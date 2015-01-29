@@ -1,5 +1,7 @@
 package com.mycelia.common.runtime;
 
+import java.util.Map;
+
 import com.mycelia.common.exception.MyceliaRuntimeException;
 import com.mycelia.common.framework.MyceliaMasterNode;
 import com.mycelia.common.framework.MyceliaSlaveNode;
@@ -51,9 +53,38 @@ public class ApplicationRuntimeFactory
 		ApplicationRuntime getApplicationRuntime(ApplicationRuntimeType runtimeType, LoadBalancerStrategy strategy,
 				Class<M> masterNodeClass, Class<S> slaveNodeClass)
 	{
+		return getApplicationRuntime(runtimeType, strategy, masterNodeClass, slaveNodeClass, null);
+	}
+	
+	/**
+	 * Find, instantiate and setup a specific Runtime for a given RuntimeType.
+	 * 
+	 * @param runtimeType
+	 * 			The wanted ApplicationRuntimeType.
+	 * 
+	 * @param strategy
+	 * 			The LoadBalancerStrategy to use in this Mycelia Application.
+	 * 
+	 * @param masterNodeClass
+	 * 			The user defined MyceliaMasterNode sublcass.
+	 * 
+	 * @param slaveNodeClass
+	 * 			The user defined MyceliaSlaveNode subclass.
+	 * 
+	 * @param options
+	 * 			Runtime specific options. null if no option specified.
+	 * 
+	 * @return
+	 * 			An instantiated MyceliaRuntime that was already setup and is
+	 * 			ready to be used by the Mycelia Application.
+	 */
+	public <M extends MyceliaMasterNode, S extends MyceliaSlaveNode>
+	ApplicationRuntime getApplicationRuntime(ApplicationRuntimeType runtimeType, LoadBalancerStrategy strategy,
+			Class<M> masterNodeClass, Class<S> slaveNodeClass, Map<String, Object> options)
+	{
 		if(strategy==null)
 			throw new IllegalArgumentException("strategy cannot be null");
-
+	
 		Class<? extends ApplicationRuntime> runtimeClass;
 		
 		try
@@ -73,6 +104,7 @@ public class ApplicationRuntimeFactory
 		{
 			ApplicationRuntime runtime=runtimeClass.newInstance();
 			
+			runtime.setOptions(options);
 			runtime.setLoadBalancerStrategy(strategy);
 			runtime.setNodeClasses(masterNodeClass, slaveNodeClass);
 			

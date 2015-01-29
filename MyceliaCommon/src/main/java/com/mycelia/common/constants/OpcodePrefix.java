@@ -9,6 +9,11 @@ public class OpcodePrefix
 	//X00 opcode prefixes
 	
 	/**
+	 * Prefix used for Transmission opcodes related to the daemon.
+	 */
+	public static final String DAEMON="3";
+	
+	/**
 	 * Prefix used for Transmission opcodes related to the sandbox.
 	 */
 	public static final String SANDBOX_MASTER="4";

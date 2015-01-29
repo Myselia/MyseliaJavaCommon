@@ -25,7 +25,7 @@ public enum ApplicationRuntimeType
 	 * The computer starting the application is only used to monitor the application's
 	 * execution across the network. Network packages are used to communicate between the MyceliaNodes.
 	 */
-	NETWORK("");
+	NETWORK("com.mycelia.common.runtime.network.NetworkApplicationRuntime");
 	
 	/**
 	 * Fully qualified class name for the implementation of the application runtime.

@@ -1,5 +1,7 @@
 package com.mycelia.common.runtime;
 
+import java.util.Map;
+
 import com.mycelia.common.framework.MyceliaMasterNode;
 import com.mycelia.common.framework.MyceliaSlaveNode;
 
@@ -29,6 +31,14 @@ public interface ApplicationRuntime
 	 * Sets the load balancer strategy for this application.
 	 */
 	public void setLoadBalancerStrategy(LoadBalancerStrategy strategy);
+	
+	/**
+	 * Sets the runtime specific options.
+	 * 
+	 * @param options
+	 * 			Runtime specific options. null if none specified.
+	 */
+	public void setOptions(Map<String, Object> options);
 	
 	/**
 	 * Initializes the runtime.
