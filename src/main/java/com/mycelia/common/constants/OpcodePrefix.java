@@ -6,32 +6,17 @@ package com.mycelia.common.constants;
  */
 public class OpcodePrefix
 {
-	//X00 opcode prefixes
+	//interpreter prefixes to:
+	public static final int STEM = 1000;
+	public static final int DAEMON=5000;
+	public static final int SANDBOX_MASTER=6000;
+	public static final int SANDBOX_SLAVE=7000;
+	public static final int LENS=8000;
+	public static final int USER=9000;
 	
-	/**
-	 * Prefix used for Transmission opcodes related to the daemon.
-	 */
-	public static final String DAEMON="3";
-	
-	/**
-	 * Prefix used for Transmission opcodes related to the sandbox.
-	 */
-	public static final String SANDBOX_MASTER="4";
-	
-	/**
-	 * Prefix used for Transmission opcodes related to the sandbox.
-	 */
-	public static final String SANDBOX_SLAVE="5";
-	
-	/**
-	 * Prefix used for Transmission opcodes related to user transmissions.
-	 */
-	public static final String USER="9";
-	
-	//0X0 opcode prefixes
-	
-	public static final String SETUP="0";
-	public static final String RUNTIME="2";
-	public static final String ERROR="4";
-	public static final String DATA="6";
+	//action prefixes for:
+	public static final int SETUP=100;
+	public static final int RUNTIME=200;
+	public static final int ERROR=400;
+	public static final int DATA=600;
 }

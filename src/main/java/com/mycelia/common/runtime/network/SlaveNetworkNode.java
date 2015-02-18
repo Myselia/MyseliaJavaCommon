@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.mycelia.common.communication.AtomConverter;
-import com.mycelia.common.communication.bean.Atom;
-import com.mycelia.common.communication.bean.Transmission;
+import com.mycelia.common.communication.structures.Atom;
+import com.mycelia.common.communication.structures.Transmission;
 import com.mycelia.common.constants.SandboxOpcodes;
 import com.mycelia.common.framework.MyceliaSlaveNode;
 import com.mycelia.common.framework.Task;
@@ -42,17 +42,17 @@ public class SlaveNetworkNode extends NetworkNode
 	@Override
 	protected void executeFrameworkAction(Transmission transmission)
 	{
-		if(transmission.getOpcode().equals(SandboxOpcodes.START_TASK_REQUEST_SLAVE))
+		if(transmission.get_header().get_opcode().equals(SandboxOpcodes.START_TASK_REQUEST_SLAVE))
 			startTaskFrameworkAction(transmission);
-		else if(transmission.getOpcode().equals(SandboxOpcodes.GET_RESULT_REQUEST_SLAVE))
+		else if(transmission.get_header().get_opcode().equals(SandboxOpcodes.GET_RESULT_REQUEST_SLAVE))
 			getTaskResultFrameworkAction(transmission);
-		else if(transmission.getOpcode().equals(SandboxOpcodes.GET_TASK_INSTANCE_REQUEST_SLAVE))
+		else if(transmission.get_header().get_opcode().equals(SandboxOpcodes.GET_TASK_INSTANCE_REQUEST_SLAVE))
 			getTaskInstanceFrameworkAction(transmission);
-		else if(transmission.getOpcode().equals(SandboxOpcodes.IS_TASK_DONE_REQUEST_SLAVE))
+		else if(transmission.get_header().get_opcode().equals(SandboxOpcodes.IS_TASK_DONE_REQUEST_SLAVE))
 			isTaskDoneFrameworkAction(transmission);
-		else if(transmission.getOpcode().equals(SandboxOpcodes.GET_TASKS_REQUEST_SLAVE))
+		else if(transmission.get_header().get_opcode().equals(SandboxOpcodes.GET_TASKS_REQUEST_SLAVE))
 			getTasksFrameworkAction(transmission);
-		else if(transmission.getOpcode().equals(SandboxOpcodes.GET_RUNNING_TASKS_REQUEST_SLAVE))
+		else if(transmission.get_header().get_opcode().equals(SandboxOpcodes.GET_RUNNING_TASKS_REQUEST_SLAVE))
 			getRunningTasksFrameworkAction(transmission);
 	}
 	

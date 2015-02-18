@@ -1,6 +1,6 @@
 package com.mycelia.common.runtime;
 
-import com.mycelia.common.communication.bean.Transmission;
+import com.mycelia.common.communication.structures.Transmission;
 
 /**
  * This is the interface that takes care of communication for a MyceliaNode.

@@ -3,9 +3,8 @@ package com.mycelia.common.framework;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.mycelia.common.communication.AtomConverter;
-import com.mycelia.common.communication.bean.Atom;
-import com.mycelia.common.communication.bean.Transmission;
+import com.mycelia.common.communication.structures.Atom;
+import com.mycelia.common.communication.structures.Transmission;
 import com.mycelia.common.constants.Constants;
 import com.mycelia.common.framework.communication.Message;
 import com.mycelia.common.runtime.CommunicationDevice;
@@ -27,18 +26,12 @@ public abstract class MyceliaNode
 	 * The communication interfaced used to communicate with other MyceliaNodes.
 	 */
 	private CommunicationDevice communicationDevice;
-	
-	private AtomConverter atomConverter;
+
 	
 	/**
 	 * The NodeContainer used to get information residing at the nodes arrangement level.
 	 */
 	private NodeContainer nodeContainer;
-	
-	public MyceliaNode()
-	{
-		atomConverter=new AtomConverter();
-	}
 	
 	/**
 	 * Abstract method to propagate NodeContainer only to some children.
@@ -71,12 +64,7 @@ public abstract class MyceliaNode
 	 */
 	private Transmission toTransmission(Message message) throws IOException
 	{
-		Transmission transmission=new Transmission();
-		transmission.setFrom(nodeId);
-		transmission.setOpcode(Constants.DEFAULT_USER_OPCODE_PREFIX);
-		
-		for(Serializable serializable: message.getElements())
-			transmission.addAtom(atomConverter.toAtomInferType(serializable));
+		Transmission transmission=new Transmission(Constants.DEFAULT_USER_OPCODE_PREFIX, "node:"+nodeId, "somewhere");
 		
 		return transmission;
 	}
