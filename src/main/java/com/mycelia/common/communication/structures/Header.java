@@ -18,7 +18,7 @@ public class Header {
 		this.to_value = Integer.parseInt(get_part(to, 1));
 	}
 
-	private String get_part(String data, int split) {
+	public static String get_part(String data, int split) {
 		String[] split_data = data.split(":");
 		if (split_data.length > 1) {
 			return split_data[split];
