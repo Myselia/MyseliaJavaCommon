@@ -12,4 +12,16 @@ public class Constants
 	 */
 	public static final int DEFAULT_USER_OPCODE_PREFIX=
 			OpcodePrefix.USER+OpcodePrefix.DATA		+0;
+	
+	/**
+	 * Enum type that distinguishes between MyCelia components. 
+	 * Use example: Within LENS initialization code, a global type variable
+	 * would identify the component as a LENS, allowing STEM networking code
+	 * to distinguish between various components. 
+	 */
+	public enum componentType {
+		DAEMON,
+		LENS,
+		SANDBOX
+	};
 }
