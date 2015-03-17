@@ -15,11 +15,18 @@ import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.Atom;
 import com.mycelia.common.communication.structures.Transmission;
 import com.mycelia.common.communication.structures.TransmissionBuilder;
+import com.mycelia.common.constants.ComponentType;
 
 public class ComponentCommunicator  implements Runnable{
 	
-	private BroadcastListener bl;
+	private static BroadcastListener bl;
 	private static MailBox mb;
+	private static ComponentType componenttype;
+	
+	static {
+		mb = new MailBox();
+	}
+	
 	
 	private Socket socket;
 	private Gson gson = new Gson();
@@ -28,6 +35,11 @@ public class ComponentCommunicator  implements Runnable{
 	
 	private boolean CONNECTED = false;
 	private String input = "";
+	
+	public ComponentCommunicator(ComponentType componenttype){
+		this.componenttype = componenttype;
+		bl = new BroadcastListener(componenttype);
+	}
 	
 	/**
 	 * ticks the communication manager 
@@ -166,7 +178,7 @@ public class ComponentCommunicator  implements Runnable{
 			System.out.print(ip);
 			
 			tb.newAtom("ip", "String", ip.toString());
-			tb.newAtom("type", "String", "LENS");
+			tb.newAtom("type", "String", componenttype.toString());
 			tb.newAtom("mac", "String", getMac(ip));
 			tb.newAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
 		

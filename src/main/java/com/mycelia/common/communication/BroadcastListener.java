@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.Atom;
 import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.constants.ComponentType;
 
 public class BroadcastListener {
 
 	private static int port = 42068;
+	private ComponentType componenttype;
 	
 	private DatagramSocket socket;
 	private byte[] buffer;
@@ -19,7 +21,8 @@ public class BroadcastListener {
 	private boolean CORRECT = false;
 	private boolean SEEKING = true;
 	
-	public BroadcastListener() {
+	public BroadcastListener(ComponentType componenttype) {
+		this.componenttype = componenttype;
 	}
 	
 	
@@ -57,7 +60,7 @@ public class BroadcastListener {
 				Atom a = list.get(2);
 				if (a.get_type().equals("String") && a.get_field().equals("type")) {
 					String check = a.get_value();
-					if (check.equals("LENS")) {
+					if (check.equals(componenttype.toString())) {
 						CORRECT = true;
 						packet = null;
 						socket.close();
