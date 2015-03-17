@@ -1,7 +1,5 @@
-package com.mycelia.common.runtime.network;
+package com.mycelia.common.runtime.local;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -9,136 +7,107 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mycelia.common.communication.AtomConverter;
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
-import com.mycelia.common.constants.DaemonOpcode;
+import com.mycelia.common.communication.bean.Atom;
+import com.mycelia.common.communication.bean.Transmission;
 import com.mycelia.common.constants.OpcodePrefix;
 import com.mycelia.common.constants.SandboxOpcodes;
-import com.mycelia.common.exception.MyceliaRuntimeException;
-import com.mycelia.common.framework.communication.TransmissionInputStream;
-import com.mycelia.common.framework.communication.TransmissionOutputStream;
-import com.mycelia.common.generic.GenericUtil;
+import com.mycelia.common.framework.MyceliaNode;
 import com.mycelia.common.runtime.CommunicationDevice;
 
-public abstract class NetworkNode implements CommunicationDevice
+/**
+ * A node running on a Thread (as opposed to a network node).
+ * 
+ * This is the equivalent of the Daemon component on a network node but for the thread node. 
+ */
+public abstract class ThreadNode extends Thread implements CommunicationDevice
 {
-	private class TransmisisonReadThread extends Thread
-	{
-		@Override
-		public void run()
-		{
-			try
-			{
-				while(true)
-				{
-					if(isInterrupted())
-						throw new InterruptedException();
-					
-					acceptTransmission(tin.readTransmission());
-				}
-			}
-			catch(IOException e)
-			{
-				logger.error("", e);
-			}
-			catch(InterruptedException e)
-			{
-				//Just let the thread finish.
-			}
-		}
-	}
-	
 	/**
 	 * How many milliseconds to sleep when waiting for an event to occur.
 	 */
 	private static final int SLEEP_DURATION=100;
 	
-	private static Logger logger=LoggerFactory.getLogger(NetworkNode.class);
+	private static Logger logger=LoggerFactory.getLogger(ThreadNode.class);
 	
 	private Queue<Transmission> userTransmissions;
 	private Queue<Transmission> frameworkTransmissions;
 	private List<Transmission> frameworkAnswerTrans;
-	private int daemonPort;
-	private String masterNodeId;
-	private TransmissionInputStream tin;
-	private TransmissionOutputStream tout;
-	private AtomConverter atomConverter;
+	private int lastTransmissionId;
+	private MyceliaNode node;
+	private LocalNodeContainer nodeContainer;
 	
-	public NetworkNode(int daemonPort)
+	public ThreadNode(ThreadGroup threadGroup, String threadName,
+			LocalNodeContainer nodeContainer, MyceliaNode node)
 	{
-		this.daemonPort=daemonPort;
+		super(threadGroup, threadName);
+		
+		this.node=node;
+		this.nodeContainer=nodeContainer;
 		
 		userTransmissions=new LinkedList<Transmission>();
 		frameworkTransmissions=new LinkedList<Transmission>();
 		frameworkAnswerTrans=new LinkedList<Transmission>();
-		atomConverter=new AtomConverter();
+		lastTransmissionId=0;
 	}
 	
-	public String getMasterNodeId()
+	public final String getNodeId()
 	{
-		return masterNodeId;
+		return node.getNodeId();
 	}
 	
-	private void getMasterNodeIdFromDaemon()
+	protected LocalNodeContainer getNodeContainer()
 	{
-		Transmission transmission=new Transmission();
-		transmission.setOpcode(DaemonOpcode.GET_MASTER_ID_REQUEST);
-		
-		sendTransmission(transmission);
-		
-		transmission=readFrameworkAnswerTransmission(DaemonOpcode.GET_MASTER_ID_ANSWER);
-		
-		masterNodeId=atomConverter.getAsString(transmission.getAtoms().get(0));
+		return nodeContainer;
 	}
 	
-	public final void start() throws IOException
+	protected String getMasterNodeId()
+	{
+		return nodeContainer.getMasterNodeId();
+	}
+	
+	private int getNewTransmissionId()
+	{
+		lastTransmissionId++;
+		
+		return lastTransmissionId;
+	}
+	
+	@Override
+	public final void run()
 	{
 		Transmission frameworkTrans;
 		
-		try(Socket socket=new Socket("127.0.0.1", daemonPort))
+		//This node has been created. Execute the nodeStart lifecycle event.
+		nodeStart(); 
+		
+		while(true)
 		{
-			tin=new TransmissionInputStream(socket.getInputStream());
-			tout=new TransmissionOutputStream(socket.getOutputStream());
+			frameworkTrans=receiveFrameworkTransmission(0);
 			
-			TransmisisonReadThread readThread=new TransmisisonReadThread();
-			readThread.start();
-			
-			getMasterNodeIdFromDaemon();
-			
-			//This node has been created. Execute the nodeStart lifecycle event.
-			nodeStart(); 
-			
-			while(true)
+			if(frameworkTrans!=null)
 			{
-				frameworkTrans=receiveFrameworkTransmission(0);
-				
-				if(frameworkTrans!=null)
+				if(frameworkTrans.getOpcode().equals(SandboxOpcodes.STOP))
 				{
-					if(frameworkTrans.getOpcode().equals(SandboxOpcodes.STOP))
+					logger.debug("Node ID "+getNodeId()+" stopping...");
+					
+					/* This node has been request to stop.
+					 * Execute nodeStop lifecycle event and then stop execution.
+					 */
+					nodeStop();
+					break;
+				}
+				else if(isAnswerTransmission(frameworkTrans.getOpcode()))
+				{
+					//Store the framework answer transmission for later retreival.
+					
+					synchronized(frameworkAnswerTrans)
 					{
-						/* This node has been request to stop.
-						 * Execute nodeStop lifecycle event and then stop execution.
-						 */
-						nodeStop();
-						readThread.interrupt();
-						GenericUtil.joindIgnoreInterrupts(readThread);
-						break;
+						frameworkAnswerTrans.add(frameworkTrans);
 					}
-					else if(isAnswerTransmission(frameworkTrans.getOpcode()))
-					{
-						//Store the framework answer transmission for later retrieval.
-						
-						synchronized(frameworkAnswerTrans)
-						{
-							frameworkAnswerTrans.add(frameworkTrans);
-						}
-					}
-					else
-					{
-						//Execute Node type dependent framework action.
-						executeFrameworkAction(frameworkTrans);
-					}
+				}
+				else
+				{
+					//Execute Node type dependent framework action.
+					executeFrameworkAction(frameworkTrans);
 				}
 			}
 		}
@@ -149,8 +118,7 @@ public abstract class NetworkNode implements CommunicationDevice
 		return opcode.equals(SandboxOpcodes.GET_RESULT_ANSWER_SLAVE)||
 				opcode.equals(SandboxOpcodes.START_TASK_ANSWER_SLAVE)||
 				opcode.equals(SandboxOpcodes.TASK_STATUS_ANSWER_SLAVE)||
-				opcode.equals(SandboxOpcodes.GET_TASK_INSTANCE_ANSWER_SLAVE)||
-				opcode.equals(DaemonOpcode.GET_MASTER_ID_ANSWER);
+				opcode.equals(SandboxOpcodes.GET_TASK_INSTANCE_ANSWER_SLAVE);
 	}
 	
 	/**
@@ -159,6 +127,8 @@ public abstract class NetworkNode implements CommunicationDevice
 	 */
 	public final void acceptTransmission(Transmission transmission)
 	{
+		logger.debug("Node ID "+getNodeId()+" received: "+transmission.toString());
+		
 		if(transmission.getOpcode().startsWith(OpcodePrefix.SANDBOX_MASTER)||
 				transmission.getOpcode().startsWith(OpcodePrefix.SANDBOX_SLAVE))
 		{
@@ -178,14 +148,12 @@ public abstract class NetworkNode implements CommunicationDevice
 	
 	private void universalSendTransmission(Transmission transmission)
 	{
-		try
-		{
-			tout.writeTransmission(transmission);
-		}
-		catch(IOException e)
-		{
-			throw new MyceliaRuntimeException(e);
-		}
+		transmission.setId(getNodeId()+"-"+getNewTransmissionId());
+		transmission.setFrom(getNodeId());
+		
+		logger.debug("Node ID "+getNodeId()+" sent: "+transmission.toString());
+		
+		nodeContainer.routeTransmission(transmission);
 	}
 	
 	/**
@@ -262,7 +230,7 @@ public abstract class NetworkNode implements CommunicationDevice
 		{
 			try
 			{
-				Thread.sleep(SLEEP_DURATION);
+				sleep(SLEEP_DURATION);
 			}
 			catch(InterruptedException e)
 			{
@@ -309,7 +277,7 @@ public abstract class NetworkNode implements CommunicationDevice
 		{
 			try
 			{
-				Thread.sleep(SLEEP_DURATION);
+				sleep(SLEEP_DURATION);
 			}
 			catch(InterruptedException e)
 			{
@@ -378,7 +346,7 @@ public abstract class NetworkNode implements CommunicationDevice
 		{
 			try
 			{
-				Thread.sleep(SLEEP_DURATION);
+				sleep(SLEEP_DURATION);
 			}
 			catch(InterruptedException e)
 			{

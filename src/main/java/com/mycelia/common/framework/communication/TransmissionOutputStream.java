@@ -1,4 +1,4 @@
-package com.mycelia.common.communication;
+package com.mycelia.common.framework.communication;
 
 import java.io.IOException;
 import java.io.OutputStream;

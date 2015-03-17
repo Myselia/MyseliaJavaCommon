@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 import com.mycelia.common.communication.structures.Atom;
 import com.mycelia.common.communication.structures.Transmission;
-import com.mycelia.common.constants.Constants;
+import com.mycelia.common.constants.ComponentType;
 import com.mycelia.common.framework.communication.Message;
 import com.mycelia.common.runtime.CommunicationDevice;
 import com.mycelia.common.runtime.LoadBalancer;
@@ -64,7 +64,7 @@ public abstract class MyceliaNode
 	 */
 	private Transmission toTransmission(Message message) throws IOException
 	{
-		Transmission transmission=new Transmission(Constants.DEFAULT_USER_OPCODE_PREFIX, "node:"+nodeId, "somewhere");
+		Transmission transmission=new Transmission(ComponentType.DEFAULT_USER_OPCODE_PREFIX, "node:"+nodeId, "somewhere");
 		
 		return transmission;
 	}
@@ -143,7 +143,7 @@ public abstract class MyceliaNode
 	 */
 	protected final void sendMessageToAnySlave(Message message) throws IOException
 	{
-		message.setTo(com.mycelia.common.constants.Constants.ANY_SLAVE_NODE);
+		message.setTo(com.mycelia.common.constants.ComponentType.ANY_SLAVE_NODE);
 		sendMessage(message);
 	}
 	
