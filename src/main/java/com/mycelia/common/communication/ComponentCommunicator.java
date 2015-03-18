@@ -19,9 +19,9 @@ import com.mycelia.common.constants.ComponentType;
 
 public class ComponentCommunicator  implements Runnable{
 	
-	private static BroadcastListener bl;
+	private BroadcastListener bl;
 	private static MailBox mb;
-	private static ComponentType componenttype;
+	private static ComponentType componentType;
 	
 	static {
 		mb = new MailBox();
@@ -37,7 +37,7 @@ public class ComponentCommunicator  implements Runnable{
 	private String input = "";
 	
 	public ComponentCommunicator(ComponentType componenttype){
-		this.componenttype = componenttype;
+		ComponentCommunicator.componentType = componenttype;
 		bl = new BroadcastListener(componenttype);
 	}
 	
@@ -68,7 +68,7 @@ public class ComponentCommunicator  implements Runnable{
 					mb.deliver(gson.fromJson(input, Transmission.class)); //STORE DELIVERED MAIL
 					break; //TODO: FIX!
 				}
-				//System.out.println("Finished incoming queue");
+				
 			} catch (IOException e) {
 				System.err.println("error in the sending or recieving of transmission, going back to seeking");
 				CONNECTED = false;
@@ -178,7 +178,7 @@ public class ComponentCommunicator  implements Runnable{
 			System.out.print(ip);
 			
 			tb.newAtom("ip", "String", ip.toString());
-			tb.newAtom("type", "String", componenttype.toString());
+			tb.newAtom("type", "String", componentType.toString());
 			tb.newAtom("mac", "String", getMac(ip));
 			tb.newAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
 		

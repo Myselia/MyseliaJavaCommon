@@ -42,7 +42,7 @@ public class BroadcastListener {
 		while (!CORRECT) {
 			try {
 				while (SEEKING) {
-					System.out.println("Waiting for setup packet");
+					System.out.println("Waiting for seek packet");
 					socket.receive(packet);
 					make = new String(buffer);
 					System.out.println("RECV Broadcast: " + make);
@@ -53,8 +53,13 @@ public class BroadcastListener {
 				System.err.println("BroadcastListener: IOException");
 				e.printStackTrace();
 			}
-		
-	    	trans = g.fromJson(make, Transmission.class);
+			
+			try {
+				//make = make.replaceAll("\\s+$", "");
+				trans = g.fromJson(make, Transmission.class);
+			} catch (Exception e) {
+				System.err.println("||" + make + "||");
+			}
 	    	ArrayList<Atom> list = trans.get_atoms();
 	    	if(list.size() == 3){
 				Atom a = list.get(2);
