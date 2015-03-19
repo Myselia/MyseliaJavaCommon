@@ -22,62 +22,73 @@ public class ComponentCommunicator  implements Runnable{
 	private BroadcastListener bl;
 	private static MailBox mb;
 	private static ComponentType componentType;
+	private Gson jsonInterpreter;
+	
+	private Socket socket;
+	private PrintWriter output;
+	private BufferedReader input;
+	
+	private boolean CONNECTED = false;
+	private String inputToken = "";
+	private String outputToken = "";
 	
 	static {
 		mb = new MailBox();
 	}
 	
-	
-	private Socket socket;
-	private Gson gson = new Gson();
-	private PrintWriter writer;
-	private BufferedReader reader;
-	
-	private boolean CONNECTED = false;
-	private String input = "";
-	
 	public ComponentCommunicator(ComponentType componenttype){
 		ComponentCommunicator.componentType = componenttype;
 		bl = new BroadcastListener(componenttype);
+		jsonInterpreter = new Gson();
 	}
 	
 	/**
-	 * ticks the communication manager 
-	 * empties out queue towards the stem
-	 * fills up in queue
-	 * @throws IOException 
+	 * ticks the communication manager empties out queue towards the stem fills
+	 * up in queue
+	 * 
+	 * @throws IOException
 	 */
-	private void tick() throws IOException{
-		if(!CONNECTED){
+	private void tick() throws IOException {
+		if (!CONNECTED) {
 			bl.startSeeking();
 			Transmission trans = bl.listen(512);
 			if (bl.transmissionReady()) {
 				bl.endSeeking();
 				connect(trans);
 			}
-		} else {		
+		} else {
 			try {
-				System.out.println(mb.getOutQueueSize());
-				
-				while(mb.getOutQueueSize() != 0){
-					writer.println(gson.toJson(mb.getNextExpedited())); //SENDING EXPEDITED MAIL
+
+				while (CONNECTED) {
+					// Get Packets
+					sendTestPacket();
+					if (input.ready()) {
+						if ((inputToken = input.readLine()) != null) {
+							mb.receive(jsonInterpreter.fromJson(inputToken, Transmission.class));
+							System.out.println("Received: " + jsonInterpreter.toJson(mb.getNextReceived()));
+						}
+					}
+
+					// Send Packets
+					if (!output.checkError()) {
+						if (mb.getOutQueueSize() > 0) {
+							outputToken = jsonInterpreter.toJson(mb.getNextToSend());
+							System.out.println("Sending: " + outputToken);
+							output.println(outputToken);
+						}
+					} else {
+						throw new IOException();
+					}
 				}
-				//System.out.println("Finished outgoing queue");
-				while (((input = reader.readLine() ) != null)) {
-					System.out.println("||" + input + "||");
-					mb.deliver(gson.fromJson(input, Transmission.class)); //STORE DELIVERED MAIL
-					break; //TODO: FIX!
-				}
-				
+
 			} catch (IOException e) {
-				System.err.println("error in the sending or recieving of transmission, going back to seeking");
+				System.err.println("Error in the sending or recieving of transmission. Seeking Stems..");
 				CONNECTED = false;
 				socket.close();
 				socket = null;
-			}
+			} 
 		}
 	}
-	
 
 	@Override
 	public void run() {
@@ -108,8 +119,8 @@ public class ComponentCommunicator  implements Runnable{
 			System.out.print("Trying to connect to host at: " + hostname + ":" + port + "... ");
 			socket = new Socket(hostname, port);
 			CONNECTED = true; /* CONNECTION ESTABLISHED*/
-			writer = new PrintWriter(socket.getOutputStream(), true);
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			output = new PrintWriter(socket.getOutputStream(), true);
+			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			System.out.println("done");
 			sendSetupPacket();
 			
@@ -133,9 +144,9 @@ public class ComponentCommunicator  implements Runnable{
 	 */
 	private void endCommunication(){
 		try{
-			writer.flush();
-			writer.close();
-			reader.close();
+			output.flush();
+			output.close();
+			input.close();
 			socket.close();
 		} catch (Exception e){
 			System.err.println("error ending communication");
@@ -148,9 +159,9 @@ public class ComponentCommunicator  implements Runnable{
 	 */
 	public static synchronized void send(Transmission trans, boolean priority){
 		if(priority){
-			mb.sendPriorityMail(trans);
+			mb.sendPriority(trans);
 		} else {
-			mb.sendMail(trans);
+			mb.send(trans);
 		}
 	}
 	
@@ -162,7 +173,7 @@ public class ComponentCommunicator  implements Runnable{
 		if(mb.getInQueueSize() == 0){
 			return null;
 		} else {
-			return mb.getNextDelivered();
+			return mb.getNextReceived();
 		}
 	}
 	
@@ -183,12 +194,26 @@ public class ComponentCommunicator  implements Runnable{
 			tb.newAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
 		
 			Transmission trans = tb.getTransmission();
-			mb.sendMail(trans);
+			output.println(jsonInterpreter.toJson(trans));
 			
 			System.out.println(" ... done");
 		} catch (Exception e) {
 			System.err.println("setup packet error");
 			//e.printStackTrace();
+		}
+	}
+	
+	private void sendTestPacket(){
+		try {
+			TransmissionBuilder tb = new TransmissionBuilder();
+			tb.newTransmission(1000, "LENS", "STEM");
+			
+			tb.newAtom("count", "String", "5");
+
+			Transmission trans = tb.getTransmission();
+			mb.send(trans);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -203,3 +228,17 @@ public class ComponentCommunicator  implements Runnable{
 	}
 
 }
+
+/*
+ * 	//System.out.println("GOT: " + mb.getNextReceived());
+				}
+				/*while(mb.getOutQueueSize() != 0){
+					output.println(gson.toJson(mb.getNextToSend())); //SENDING EXPEDITED MAIL
+				}
+				//System.out.println("Finished outgoing queue");
+				while (((inputToken = input.readLine() ) != null)) {
+					System.out.println("||" + inputToken + "||");
+					mb.receive(gson.fromJson(inputToken, Transmission.class)); //STORE DELIVERED MAIL
+					break; //TODO: FIX!
+				}*/
+				

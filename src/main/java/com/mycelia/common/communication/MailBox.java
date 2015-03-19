@@ -18,7 +18,7 @@ public class MailBox {
 	 * 
 	 * @param trans
 	 */
-	public void sendMail(Transmission trans) {
+	public void send(Transmission trans) {
 		out_queue.add(trans);
 	}
 
@@ -28,17 +28,27 @@ public class MailBox {
 	 * 
 	 * @param trans
 	 */
-	public void sendPriorityMail(Transmission trans) {
+	public void sendPriority(Transmission trans) {
 		out_queue.add(0, trans);
 	}
 
+
+	/**
+	 * Adds the transmission to the incoming queue
+	 * The transmission will be processed as soon as it becomes the next item that is being polled
+	 * @param trans
+	 */
+	public void receive(Transmission trans) {
+		in_queue.add(trans);
+	}
+	
 	/**
 	 * Gets the next element that needs to be transmitted Return null if the
 	 * queue is empty
 	 * 
 	 * @return transmission
 	 */
-	public Transmission getNextExpedited() {
+	public Transmission getNextToSend() {
 		if (this.getOutQueueSize() == 0) {
 			return null;
 		} else {
@@ -47,19 +57,10 @@ public class MailBox {
 	}
 
 	/**
-	 * Adds the transmission to the incoming queue
-	 * The transmission will be processed as soon as it becomes the next item that is being polled
-	 * @param trans
-	 */
-	public void deliver(Transmission trans) {
-		in_queue.add(trans);
-	}
-
-	/**
 	 * Returns the next available transmission that was recieved
 	 * @return transmission
 	 */
-	public Transmission getNextDelivered() {
+	public Transmission getNextReceived() {
 		if (this.getInQueueSize() == 0) {
 			return null;
 		} else {

@@ -16,7 +16,6 @@ public class BroadcastListener {
 	private ComponentType componenttype;
 	
 	private DatagramSocket socket;
-	private byte[] buffer;
 	
 	private boolean CORRECT = false;
 	private boolean SEEKING = true;
@@ -33,16 +32,18 @@ public class BroadcastListener {
 	 */
 	public Transmission listen(int length){
 		Gson g = new Gson();
-	    buffer = new byte[length];
 	    setupSocket();
-	    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 	    Transmission trans = new Transmission();
+	    byte[] buffer;
+	    DatagramPacket packet;
 	    String make = "";
 		
 		while (!CORRECT) {
 			try {
 				while (SEEKING) {
 					System.out.println("Waiting for seek packet");
+					buffer = new byte[length];
+					packet = new DatagramPacket(buffer, buffer.length);
 					socket.receive(packet);
 					make = new String(buffer);
 					System.out.println("RECV Broadcast: " + make);
@@ -57,8 +58,10 @@ public class BroadcastListener {
 			try {
 				//make = make.replaceAll("\\s+$", "");
 				trans = g.fromJson(make, Transmission.class);
+				System.out.println("[OK]" + make + "[OK]");
 			} catch (Exception e) {
-				System.err.println("||" + make + "||");
+				System.err.println("[ERROR]" + make + "[ERROR]");
+				e.printStackTrace();
 			}
 	    	ArrayList<Atom> list = trans.get_atoms();
 	    	if(list.size() == 3){
