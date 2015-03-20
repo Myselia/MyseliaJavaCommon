@@ -2,11 +2,9 @@ package com.mycelia.common.communication;
 
 import java.util.LinkedList;
 
-import com.mycelia.common.communication.structures.Transmission;
-
-public class MailBox {
-	private LinkedList<Transmission> in_queue = new LinkedList<Transmission>();
-	private LinkedList<Transmission> out_queue = new LinkedList<Transmission>();
+public class MailBox<T> {
+	private LinkedList<T> in_queue = new LinkedList<T>();
+	private LinkedList<T> out_queue = new LinkedList<T>();
 
 	public MailBox() {
 		// Do nothing
@@ -18,7 +16,7 @@ public class MailBox {
 	 * 
 	 * @param trans
 	 */
-	public void send(Transmission trans) {
+	public void send(T trans) {
 		out_queue.add(trans);
 	}
 
@@ -28,7 +26,7 @@ public class MailBox {
 	 * 
 	 * @param trans
 	 */
-	public void sendPriority(Transmission trans) {
+	public void sendPriority(T trans) {
 		out_queue.add(0, trans);
 	}
 
@@ -38,7 +36,7 @@ public class MailBox {
 	 * The transmission will be processed as soon as it becomes the next item that is being polled
 	 * @param trans
 	 */
-	public void receive(Transmission trans) {
+	public void receive(T trans) {
 		in_queue.add(trans);
 	}
 	
@@ -48,7 +46,7 @@ public class MailBox {
 	 * 
 	 * @return transmission
 	 */
-	public Transmission getNextToSend() {
+	public T getNextToSend() {
 		if (this.getOutQueueSize() == 0) {
 			return null;
 		} else {
@@ -60,7 +58,7 @@ public class MailBox {
 	 * Returns the next available transmission that was recieved
 	 * @return transmission
 	 */
-	public Transmission getNextReceived() {
+	public T getNextReceived() {
 		if (this.getInQueueSize() == 0) {
 			return null;
 		} else {

@@ -20,7 +20,7 @@ import com.mycelia.common.constants.ComponentType;
 public class ComponentCommunicator  implements Runnable{
 	
 	private BroadcastListener bl;
-	private static MailBox mb;
+	private static MailBox<Transmission> mb;
 	private static ComponentType componentType;
 	private Gson jsonInterpreter;
 	
@@ -33,7 +33,7 @@ public class ComponentCommunicator  implements Runnable{
 	private String outputToken = "";
 	
 	static {
-		mb = new MailBox();
+		mb = new MailBox<Transmission>();
 	}
 	
 	public ComponentCommunicator(ComponentType componenttype){
@@ -61,7 +61,7 @@ public class ComponentCommunicator  implements Runnable{
 
 				while (CONNECTED) {
 					// Get Packets
-					sendTestPacket();
+					//sendTestPacket();
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
 							mb.receive(jsonInterpreter.fromJson(inputToken, Transmission.class));
@@ -173,7 +173,7 @@ public class ComponentCommunicator  implements Runnable{
 		if(mb.getInQueueSize() == 0){
 			return null;
 		} else {
-			return mb.getNextReceived();
+			return (Transmission) mb.getNextReceived();
 		}
 	}
 	

@@ -44,7 +44,7 @@ public class TransmissionBuilder {
 	 * @param message
 	 */
 	public void addMessage(Message message){
-		this.newAtom("Serialized", "Message", SerializationUtils.serialize(message).toString());
+		this.newAtom("Serialized", "Message", new String(SerializationUtils.serialize(message)));
 	}
 	
 	/**
