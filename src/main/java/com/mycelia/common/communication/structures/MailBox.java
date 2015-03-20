@@ -1,4 +1,4 @@
-package com.mycelia.common.communication;
+package com.mycelia.common.communication.structures;
 
 import java.util.LinkedList;
 

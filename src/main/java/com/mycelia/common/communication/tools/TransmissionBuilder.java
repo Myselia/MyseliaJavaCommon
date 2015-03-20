@@ -1,9 +1,13 @@
-package com.mycelia.common.communication.structures;
+package com.mycelia.common.communication.tools;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.apache.commons.lang.SerializationUtils;
+
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Message;
+import com.mycelia.common.communication.units.Transmission;
 
 public class TransmissionBuilder {
 	private Transmission transmission;

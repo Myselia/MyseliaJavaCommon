@@ -12,9 +12,10 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
-import com.mycelia.common.communication.structures.TransmissionBuilder;
+import com.mycelia.common.communication.structures.MailBox;
+import com.mycelia.common.communication.tools.TransmissionBuilder;
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.ComponentType;
 
 public class ComponentCommunicator  implements Runnable{

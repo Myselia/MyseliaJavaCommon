@@ -6,8 +6,8 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.ComponentType;
 
 public class BroadcastListener {

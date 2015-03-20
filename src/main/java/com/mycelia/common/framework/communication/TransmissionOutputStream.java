@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.google.gson.Gson;
-import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.generic.FrameOutputStream;
 
 public class TransmissionOutputStream extends FrameOutputStream

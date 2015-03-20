@@ -1,4 +1,4 @@
-package com.mycelia.common.communication.structures;
+package com.mycelia.common.communication.units;
 
 import java.util.ArrayList;
 

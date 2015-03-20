@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.mycelia.common.communication.AtomConverter;
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.SandboxOpcodes;
 import com.mycelia.common.framework.MyceliaSlaveNode;
 import com.mycelia.common.framework.Task;

@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mycelia.common.communication.AtomConverter;
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.DaemonOpcode;
 import com.mycelia.common.constants.OpcodePrefix;
 import com.mycelia.common.constants.SandboxOpcodes;

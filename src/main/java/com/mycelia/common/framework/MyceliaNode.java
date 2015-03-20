@@ -3,8 +3,8 @@ package com.mycelia.common.framework;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.mycelia.common.communication.structures.Atom;
-import com.mycelia.common.communication.structures.Transmission;
+import com.mycelia.common.communication.units.Atom;
+import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.ComponentType;
 import com.mycelia.common.framework.communication.Message;
 import com.mycelia.common.runtime.CommunicationDevice;

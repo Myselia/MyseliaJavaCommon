@@ -1,4 +1,4 @@
-package com.mycelia.common.communication.structures;
+package com.mycelia.common.communication.units;
 
 public class Atom {
 	private String field;
