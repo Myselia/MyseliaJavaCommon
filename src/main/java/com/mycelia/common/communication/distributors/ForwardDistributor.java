@@ -7,10 +7,10 @@ import com.mycelia.common.communication.Addressable;
 
 public class ForwardDistributor implements Distributor {
 	
-	private HashMap<String, ArrayList<Addressable>> distributeMap;
+	private HashMap<String, ArrayList<Addressable>> map;
 
 	public ForwardDistributor(HashMap<String, ArrayList<Addressable>> map) {
-		
+		this.map = map;
 	}
 	
 	@Override

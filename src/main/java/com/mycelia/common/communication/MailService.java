@@ -2,22 +2,21 @@ package com.mycelia.common.communication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import com.mycelia.common.communication.distributors.Distributor;
 import com.mycelia.common.communication.distributors.DistributorFactory;
 import com.mycelia.common.communication.distributors.DistributorType;
-import com.mycelia.common.communication.structures.MailBox;
-import com.mycelia.common.communication.units.Atom;
-import com.mycelia.common.communication.units.Transmission;
 
 public class MailService implements Runnable {
-    private static HashMap<String, ArrayList<Addressable>> map;
-    private MailBox<Transmission> mainMailbo;
+    private HashMap<String, ArrayList<Addressable>> map;
     private ArrayList<Addressable> systemList;
     private Distributor distributor;
     private DistributorType distributorType;
      
+    /**
+     * Mail service constructor that sets a distributor type
+     * @param distributorType
+     */
     public MailService(DistributorType distributorType) {
     	this.distributorType = distributorType;
         map = new HashMap<String, ArrayList<Addressable>>();
@@ -31,6 +30,7 @@ public class MailService implements Runnable {
      * @param subsystem	The subsystem registering (typically 'this')
      */
     public void register(String field, Addressable subsystem) {
+    	registerAddressable(subsystem);
     	ArrayList<Addressable> a;
     	//First time field is accessed 
     	if (map.get(field) == null) {
@@ -42,16 +42,22 @@ public class MailService implements Runnable {
     	a.add(subsystem);
     }
     
-    public void register(Addressable subsystem) {
-    	systemList.add(subsystem);
+    /**
+     * Registers the subsystem to the system list
+     * @param subsystem
+     */
+    public void registerAddressable(Addressable subsystem) {
+    	if(!isRegistered(subsystem)){
+    		systemList.add(subsystem);
+    	}
     }
     
     /**
-     * De-registers the component from the particular field
+     * Unregisters the component from the particular field
      * @param field
      * @param subsystem
      */
-    public void deRegister(String field, Addressable subsystem) {
+    public void unregister(String field, Addressable subsystem) {
 		ArrayList<Addressable> subscriberList;
 		if ((map.get(field) != null)) {
 			subscriberList = map.get(field);
@@ -75,45 +81,35 @@ public class MailService implements Runnable {
     	}
     }
     
+	/**
+	 * getter for the mappings of the fields to addressable units
+	 * @return
+	 */
 	public HashMap<String, ArrayList<Addressable>> getMap() {
 		return map;
 	}
 
 	/**
-	 * 
+	 * swaps the distributor for a different one based on 
 	 * @param distributorType
 	 */
 	public void swapDistributor(DistributorType distributorType) {
-		this.distributor = DistributorFactory.makeDistributor(distributorType, map, systemList);
-	}
-
-	//At this point a packet is going to be pulled
-	private void sendMail() {
-		//We get a transmission from the in queue of COomponent communicator
-		Transmission t = ComponentCommunicator.receive();
-		//Now we check the atoms
-		Iterator<Atom> atomI = t.get_atoms().iterator();
-		while (atomI.hasNext()) {
-			Atom a = atomI.next();
-			
-			forwardByAtom(a.get_field(), t);
-		}
-	}
-	
-	private void forwardByAtom(String s, Transmission t) {
-		ArrayList<Addressable> listenerList = map.get(s);
-		Iterator<Addressable> it = listenerList.iterator();
-		
-		while (it.hasNext()) {
-			Addressable subsystem = it.next();
-			subsystem.getMailBox().putInInQueue(t);
+		if(this.distributorType != distributorType){
+			this.distributorType = distributorType;
+			initialize_distributor();
 		}
 	}
     
+	/**
+	 * initializes the distributor to whatever type was preset
+	 */
     private void initialize_distributor(){
         distributor = DistributorFactory.makeDistributor(distributorType, map, systemList);
     }
 
+    /**
+     * run method that loops through the distributor's tick
+     */
 	@Override
 	public void run() {
 		while (!Thread.currentThread().isInterrupted()) {

@@ -29,7 +29,14 @@ public class MailBox<T> {
 	public void putInOutQueueTop(T trans) {
 		out_queue.add(0, trans);
 	}
-
+	
+	/**
+	 * Adds all the elements of the given list into the out queue
+	 * @param out_list
+	 */
+	public void putAllInOutQueue(LinkedList<T> out_list){
+		out_queue.addAll(out_list);
+	}
 
 	/**
 	 * Adds the transmission to the incoming queue
@@ -38,6 +45,14 @@ public class MailBox<T> {
 	 */
 	public void putInInQueue(T trans) {
 		in_queue.add(trans);
+	}
+	
+	/**
+	 * Adds all the elements on the given list into the in queue
+	 * @param in_list
+	 */
+	public void putAllInInQueue(LinkedList<T> in_list){
+		in_queue.addAll(in_list);
 	}
 	
 	/**
@@ -80,5 +95,21 @@ public class MailBox<T> {
 	 */
 	public int getOutQueueSize() {
 		return out_queue.size();
+	}
+	
+	/**
+	 * Returns everything from the in queue of the Mailbox
+	 * @return
+	 */
+	public LinkedList<T> getAllFromInQueue(){
+		return in_queue;
+	}
+	
+	/**
+	 * Returns everything from the out queue of the Mailbox
+	 * @return
+	 */
+	public LinkedList<T> getAllFromOutQueue(){
+		return out_queue;
 	}
 }

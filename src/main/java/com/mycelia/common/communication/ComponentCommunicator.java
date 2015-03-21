@@ -13,15 +13,17 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.MailBox;
-import com.mycelia.common.communication.tools.TransmissionBuilder;
+import com.mycelia.common.communication.tools.BroadcastListener;
 import com.mycelia.common.communication.units.Atom;
 import com.mycelia.common.communication.units.Transmission;
-import com.mycelia.common.constants.ComponentType;
+import com.mycelia.common.communication.units.TransmissionBuilder;
+import com.mycelia.common.constants.opcode.ComponentType;
 
 public class ComponentCommunicator implements Runnable, Addressable{
 	
 	private BroadcastListener bl;
-	private static MailBox<Transmission> mb;
+	private static MailBox<Transmission> networkMailbox;
+	private static MailBox<Transmission> systemMailbox;
 	private static ComponentType componentType;
 	private Gson jsonInterpreter;
 	
@@ -34,11 +36,12 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	private String outputToken = "";
 	
 	static {
-		mb = new MailBox<Transmission>();
+		networkMailbox = new MailBox<Transmission>();
+		systemMailbox = new MailBox<Transmission>();
 	}
-	
-	public ComponentCommunicator(ComponentType componenttype){
-		ComponentCommunicator.componentType = componenttype;
+
+	public ComponentCommunicator(ComponentType componenttype) {
+		componentType = componenttype;
 		bl = new BroadcastListener(componenttype);
 		jsonInterpreter = new Gson();
 	}
@@ -49,7 +52,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	 * 
 	 * @throws IOException
 	 */
-	private void tick() throws IOException {
+	private void tick() {
 		if (!CONNECTED) {
 			bl.startSeeking();
 			Transmission trans = bl.listen(512);
@@ -61,34 +64,40 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			try {
 
 				while (CONNECTED) {
-					// Get Packets
 					//sendTestPacket();
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
-							mb.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
-							System.out.println("Received: " + jsonInterpreter.toJson(mb.getFromInQueue()));
+							networkMailbox.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
+							System.out.println("Received: " + jsonInterpreter.toJson(networkMailbox.getFromInQueue()));
 						}
 					}
 
 					// Send Packets
 					if (!output.checkError()) {
-						if (mb.getOutQueueSize() > 0) {
-							outputToken = jsonInterpreter.toJson(mb.getFromOutQueue());
+						if (networkMailbox.getOutQueueSize() > 0) {
+							outputToken = jsonInterpreter.toJson(networkMailbox.getFromOutQueue());
 							System.out.println("Sending: " + outputToken);
 							output.println(outputToken);
 						}
 					} else {
+						socket.close();
 						throw new IOException();
 					}
+					
+					handle_mailboxes();
 				}
 
 			} catch (IOException e) {
-				System.err.println("Error in the sending or recieving of transmission. Seeking Stems..");
+				System.err.println("error in the sending or recieving of transmission. Seeking Stems...");
 				CONNECTED = false;
-				socket.close();
 				socket = null;
 			} 
 		}
+	}
+	
+	private void handle_mailboxes() {
+		systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
+		networkMailbox.putAllInInQueue(systemMailbox.getAllFromOutQueue());
 	}
 
 	@Override
@@ -155,30 +164,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	}
 	
 	/**
-	 * wrapper for the outgoing queue
-	 * @param trans
-	 */
-	public static synchronized void send(Transmission trans, boolean priority){
-		if(priority){
-			mb.putInOutQueueTop(trans);
-		} else {
-			mb.putInOutQueue(trans);
-		}
-	}
-	
-	/**
-	 * wrapper for the incoming queue
-	 * @return
-	 */
-	public static synchronized Transmission receive(){
-		if(mb.getInQueueSize() == 0){
-			return null;
-		} else {
-			return (Transmission) mb.getFromInQueue();
-		}
-	}
-	
-	/**
 	 * sends a setup packet containing 
 	 */
 	private void sendSetupPacket(){
@@ -204,20 +189,28 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		}
 	}
 	
+	/**
+	 * Test packet building method
+	 */
 	private void sendTestPacket(){
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
 			tb.newTransmission(1000, "LENS", "STEM");
-			
 			tb.newAtom("count", "String", "5");
 
 			Transmission trans = tb.getTransmission();
-			mb.putInOutQueue(trans);
+			networkMailbox.putInOutQueue(trans);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Method that returns the MAC address of the InetAddress in question
+	 * @param ia
+	 * @return String (MAC)
+	 * @throws SocketException
+	 */
 	private String getMac(InetAddress ia) throws SocketException {
 		NetworkInterface network = NetworkInterface.getByInetAddress(ia);
 		byte[] mac = network.getHardwareAddress();
@@ -230,21 +223,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 
 	@Override
 	public MailBox<Transmission> getMailBox() {
-		return mb;
+		return systemMailbox;
 	}
 
 }
-
-/*
- * 	//System.out.println("GOT: " + mb.getNextReceived());
-				}
-				/*while(mb.getOutQueueSize() != 0){
-					output.println(gson.toJson(mb.getNextToSend())); //SENDING EXPEDITED MAIL
-				}
-				//System.out.println("Finished outgoing queue");
-				while (((inputToken = input.readLine() ) != null)) {
-					System.out.println("||" + inputToken + "||");
-					mb.receive(gson.fromJson(inputToken, Transmission.class)); //STORE DELIVERED MAIL
-					break; //TODO: FIX!
-				}*/
-				

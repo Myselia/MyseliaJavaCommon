@@ -23,7 +23,7 @@ public class DistributorFactory {
 		case FORWARDER:
 			return new ForwardDistributor(map);
 		case LOAD_BALANCER:
-			return new LoadBalancer();
+			return new LoadBalanceDistributor();
 		default:
 			break;
 		}
