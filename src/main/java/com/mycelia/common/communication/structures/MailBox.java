@@ -16,7 +16,7 @@ public class MailBox<T> {
 	 * 
 	 * @param trans
 	 */
-	public void send(T trans) {
+	public void putInOutQueue(T trans) {
 		out_queue.add(trans);
 	}
 
@@ -26,7 +26,7 @@ public class MailBox<T> {
 	 * 
 	 * @param trans
 	 */
-	public void sendPriority(T trans) {
+	public void putInOutQueueTop(T trans) {
 		out_queue.add(0, trans);
 	}
 
@@ -36,7 +36,7 @@ public class MailBox<T> {
 	 * The transmission will be processed as soon as it becomes the next item that is being polled
 	 * @param trans
 	 */
-	public void receive(T trans) {
+	public void putInInQueue(T trans) {
 		in_queue.add(trans);
 	}
 	
@@ -46,7 +46,7 @@ public class MailBox<T> {
 	 * 
 	 * @return transmission
 	 */
-	public T getNextToSend() {
+	public T getFromOutQueue() {
 		if (this.getOutQueueSize() == 0) {
 			return null;
 		} else {
@@ -55,10 +55,10 @@ public class MailBox<T> {
 	}
 
 	/**
-	 * Returns the next available transmission that was recieved
+	 * Returns the next available transmission that was received
 	 * @return transmission
 	 */
-	public T getNextReceived() {
+	public T getFromInQueue() {
 		if (this.getInQueueSize() == 0) {
 			return null;
 		} else {
@@ -68,7 +68,7 @@ public class MailBox<T> {
 
 	/**
 	 * Returns the size of the incoming queue
-	 * @return int
+	 * @return integer
 	 */
 	public int getInQueueSize() {
 		return in_queue.size();
@@ -76,7 +76,7 @@ public class MailBox<T> {
 
 	/**
 	 * Returns the size of the outgoing queue
-	 * @return int 
+	 * @return integer
 	 */
 	public int getOutQueueSize() {
 		return out_queue.size();

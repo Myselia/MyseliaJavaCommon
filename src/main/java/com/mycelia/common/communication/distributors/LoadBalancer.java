@@ -1,5 +1,11 @@
 package com.mycelia.common.communication.distributors;
 
-public abstract class LoadBalancer implements Distributor {
+public class LoadBalancer implements Distributor {
+
+	@Override
+	public void tick() {
+		
+		
+	}
 
 }

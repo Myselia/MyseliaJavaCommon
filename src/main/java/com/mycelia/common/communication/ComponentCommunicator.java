@@ -18,7 +18,7 @@ import com.mycelia.common.communication.units.Atom;
 import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.constants.ComponentType;
 
-public class ComponentCommunicator  implements Runnable{
+public class ComponentCommunicator implements Runnable, Addressable{
 	
 	private BroadcastListener bl;
 	private static MailBox<Transmission> mb;
@@ -65,15 +65,15 @@ public class ComponentCommunicator  implements Runnable{
 					//sendTestPacket();
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
-							mb.receive(jsonInterpreter.fromJson(inputToken, Transmission.class));
-							System.out.println("Received: " + jsonInterpreter.toJson(mb.getNextReceived()));
+							mb.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
+							System.out.println("Received: " + jsonInterpreter.toJson(mb.getFromInQueue()));
 						}
 					}
 
 					// Send Packets
 					if (!output.checkError()) {
 						if (mb.getOutQueueSize() > 0) {
-							outputToken = jsonInterpreter.toJson(mb.getNextToSend());
+							outputToken = jsonInterpreter.toJson(mb.getFromOutQueue());
 							System.out.println("Sending: " + outputToken);
 							output.println(outputToken);
 						}
@@ -160,9 +160,9 @@ public class ComponentCommunicator  implements Runnable{
 	 */
 	public static synchronized void send(Transmission trans, boolean priority){
 		if(priority){
-			mb.sendPriority(trans);
+			mb.putInOutQueueTop(trans);
 		} else {
-			mb.send(trans);
+			mb.putInOutQueue(trans);
 		}
 	}
 	
@@ -174,7 +174,7 @@ public class ComponentCommunicator  implements Runnable{
 		if(mb.getInQueueSize() == 0){
 			return null;
 		} else {
-			return (Transmission) mb.getNextReceived();
+			return (Transmission) mb.getFromInQueue();
 		}
 	}
 	
@@ -212,7 +212,7 @@ public class ComponentCommunicator  implements Runnable{
 			tb.newAtom("count", "String", "5");
 
 			Transmission trans = tb.getTransmission();
-			mb.send(trans);
+			mb.putInOutQueue(trans);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -226,6 +226,11 @@ public class ComponentCommunicator  implements Runnable{
 			sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public MailBox<Transmission> getMailBox() {
+		return mb;
 	}
 
 }
