@@ -21,7 +21,7 @@ public class DistributorFactory {
 		
 		switch (distributorType) {
 		case FORWARDER:
-			return new ForwardDistributor(map);
+			return new ForwardDistributor(map, systemList);
 		case LOAD_BALANCER:
 			return new LoadBalanceDistributor();
 		default:

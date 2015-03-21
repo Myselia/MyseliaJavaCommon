@@ -23,8 +23,8 @@ public class TransmissionBuilder {
 	 * @param from
 	 * @param to
 	 */
-	public void newTransmission(int opcode, String from, String to){
-		transmission = new Transmission(id, opcode, from, to);
+	public void newTransmission(String from, String to){
+		transmission = new Transmission(id, from, to);
 	}
 	
 	/**
@@ -33,7 +33,7 @@ public class TransmissionBuilder {
 	 * @param type
 	 * @param value
 	 */
-	public void newAtom(String field, String type, String value){
+	public void addAtom(String field, String type, String value){
 		Atom atom = new Atom(field, type, value);
 		list.add(atom);
 	}
@@ -43,7 +43,7 @@ public class TransmissionBuilder {
 	 * @param message
 	 */
 	public void addMessage(Message message){
-		this.newAtom("Serialized", "Message", new String(SerializationUtils.serialize(message)));
+		this.addAtom("Serialized", "Messsage", new String(SerializationUtils.serialize(message)));
 	}
 	
 	/**

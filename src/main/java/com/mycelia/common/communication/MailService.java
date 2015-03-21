@@ -8,10 +8,15 @@ import com.mycelia.common.communication.distributors.DistributorFactory;
 import com.mycelia.common.communication.distributors.DistributorType;
 
 public class MailService implements Runnable {
-    private HashMap<String, ArrayList<Addressable>> map;
-    private ArrayList<Addressable> systemList;
+    private static HashMap<String, ArrayList<Addressable>> map;
+    private static ArrayList<Addressable> systemList;
     private Distributor distributor;
     private DistributorType distributorType;
+    
+    static{
+        map = new HashMap<String, ArrayList<Addressable>>();
+        systemList = new ArrayList<Addressable>();
+    }
      
     /**
      * Mail service constructor that sets a distributor type
@@ -19,25 +24,25 @@ public class MailService implements Runnable {
      */
     public MailService(DistributorType distributorType) {
     	this.distributorType = distributorType;
-        map = new HashMap<String, ArrayList<Addressable>>();
         
         initialize_distributor();    
     }
     
     /**
      * Call to register to packet updates containing a particular field.
-     * @param field	The field to listen for updates to
+     * @param opcode	The field to listen for updates to
      * @param subsystem	The subsystem registering (typically 'this')
      */
-    public void register(String field, Addressable subsystem) {
+    public static void register(String opcode, Addressable subsystem) {
+    	System.out.println("registered addressable : " + subsystem.getClass().toString() + " to OPCODE: " + opcode);
     	registerAddressable(subsystem);
     	ArrayList<Addressable> a;
     	//First time field is accessed 
-    	if (map.get(field) == null) {
+    	if (map.get(opcode) == null) {
     		a = new ArrayList<Addressable>();
-    		map.put(field, a);
+    		map.put(opcode, a);
     	} else {
-    		a = map.get(field);
+    		a = map.get(opcode);
     	}
     	a.add(subsystem);
     }
@@ -46,7 +51,7 @@ public class MailService implements Runnable {
      * Registers the subsystem to the system list
      * @param subsystem
      */
-    public void registerAddressable(Addressable subsystem) {
+    public static void registerAddressable(Addressable subsystem) {
     	if(!isRegistered(subsystem)){
     		systemList.add(subsystem);
     	}
@@ -73,7 +78,7 @@ public class MailService implements Runnable {
      * @param alpha
      * @return
      */
-	public boolean isRegistered(Addressable alpha){
+	public static boolean isRegistered(Addressable alpha){
     	if (systemList.contains(alpha)){
     		return true;
     	} else {

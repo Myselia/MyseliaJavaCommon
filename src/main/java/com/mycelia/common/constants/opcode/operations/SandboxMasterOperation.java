@@ -5,6 +5,6 @@ import com.mycelia.common.constants.opcode.Operation;
 /**
  * Opcodes used by the Sandbox Master
  */
-public enum SandboxMasterOperation implements Operation {
+public class SandboxMasterOperation extends Operation {
 
 }

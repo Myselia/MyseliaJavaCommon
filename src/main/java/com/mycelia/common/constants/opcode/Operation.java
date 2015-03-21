@@ -1,6 +1,9 @@
 package com.mycelia.common.constants.opcode;
 
 
-public interface Operation extends Opcode{
+public abstract class Operation implements Opcode {
 
+	public static final String SEND_SETUP = "SENDSETUP";
+	public static final String BROADCAST = "BROADCAST";
+	public static final String SEEK = "SEEK";
 }

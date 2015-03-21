@@ -56,7 +56,6 @@ public class BroadcastListener {
 			}
 			
 			try {
-				//make = make.replaceAll("\\s+$", "");
 				trans = g.fromJson(make, Transmission.class);
 				System.out.println("[OK]" + make + "[OK]");
 			} catch (Exception e) {

@@ -5,6 +5,6 @@ import com.mycelia.common.constants.opcode.Operation;
 /**
  * Opcodes used by the Sandbox Slave
  */
-public enum DatabaseOperation implements Operation {
-
+public class DatabaseOperation extends Operation {
+	
 }

@@ -22,12 +22,7 @@ public enum ComponentType implements Opcode {
 	/**
 	 * Stem running in master mode
 	 */
-	STEMMASTER,
-	
-	/**
-	 * Stem running in slave mode (relay)
-	 */
-	STEMSLAVE,
+	STEM,
 	
 	/**
 	 * Daemon component

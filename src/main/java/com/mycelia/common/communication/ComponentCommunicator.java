@@ -17,14 +17,19 @@ import com.mycelia.common.communication.tools.BroadcastListener;
 import com.mycelia.common.communication.units.Atom;
 import com.mycelia.common.communication.units.Transmission;
 import com.mycelia.common.communication.units.TransmissionBuilder;
+import com.mycelia.common.constants.opcode.ActionType;
 import com.mycelia.common.constants.opcode.ComponentType;
-
+import com.mycelia.common.constants.opcode.OpcodeAccessor;
+import com.mycelia.common.constants.opcode.Operation;
+import com.mycelia.common.constants.opcode.operations.StemOperation;
+	
 public class ComponentCommunicator implements Runnable, Addressable{
 	
-	private BroadcastListener bl;
 	private static MailBox<Transmission> networkMailbox;
 	private static MailBox<Transmission> systemMailbox;
 	private static ComponentType componentType;
+	private static Operation componentOp;
+	private BroadcastListener bl;
 	private Gson jsonInterpreter;
 	
 	private Socket socket;
@@ -40,9 +45,10 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		systemMailbox = new MailBox<Transmission>();
 	}
 
-	public ComponentCommunicator(ComponentType componenttype) {
-		componentType = componenttype;
-		bl = new BroadcastListener(componenttype);
+	public ComponentCommunicator(ComponentType componentType) {
+		ComponentCommunicator.componentType = componentType;
+		componentOp = OpcodeAccessor.getOpcodes(componentType);
+		bl = new BroadcastListener(componentType);
 		jsonInterpreter = new Gson();
 	}
 	
@@ -68,7 +74,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
 							networkMailbox.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
-							System.out.println("Received: " + jsonInterpreter.toJson(networkMailbox.getFromInQueue()));
+							//System.out.println("Received: " + jsonInterpreter.toJson(networkMailbox.getFromInQueue()));
 						}
 					}
 
@@ -76,7 +82,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					if (!output.checkError()) {
 						if (networkMailbox.getOutQueueSize() > 0) {
 							outputToken = jsonInterpreter.toJson(networkMailbox.getFromOutQueue());
-							System.out.println("Sending: " + outputToken);
 							output.println(outputToken);
 						}
 					} else {
@@ -170,14 +175,16 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		System.out.print("Setting up setup packet ... ");
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
-			tb.newTransmission(1000, "LENS", "STEM");
+			String from = OpcodeAccessor.make(componentType, ActionType.SETUP, componentOp.SEND_SETUP);
+			String to = OpcodeAccessor.make(ComponentType.STEM, ActionType.SETUP, StemOperation.ACCEPT_SETUP);
+			tb.newTransmission(from, to);
 			InetAddress ip = Inet4Address.getLocalHost();
 			System.out.print(ip);
 			
-			tb.newAtom("ip", "String", ip.toString());
-			tb.newAtom("type", "String", componentType.toString());
-			tb.newAtom("mac", "String", getMac(ip));
-			tb.newAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
+			tb.addAtom("ip", "String", ip.toString());
+			tb.addAtom("type", "String", componentType.toString());
+			tb.addAtom("mac", "String", getMac(ip));
+			tb.addAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
 		
 			Transmission trans = tb.getTransmission();
 			output.println(jsonInterpreter.toJson(trans));
@@ -195,8 +202,8 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	private void sendTestPacket(){
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
-			tb.newTransmission(1000, "LENS", "STEM");
-			tb.newAtom("count", "String", "5");
+			tb.newTransmission("LENS", "STEM");
+			tb.addAtom("count", "String", "5");
 
 			Transmission trans = tb.getTransmission();
 			networkMailbox.putInOutQueue(trans);
