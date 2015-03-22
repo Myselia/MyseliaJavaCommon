@@ -22,17 +22,18 @@ public class ForwardDistributor implements Distributor {
 
 	@Override
 	public void tick() {
-		//Iterator<Addressable> it = systemList.iterator();
-		for (Addressable subSystem : systemList) {
+		ArrayList<Addressable> copylist = systemList;
+		for (Addressable subSystem : copylist) {
 			MailBox<Transmission> mail = (MailBox<Transmission>) subSystem.getMailBox();
 			if (mail.getOutQueueSize() > 0) {
-				System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
+				//System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
 				Transmission t = mail.getFromOutQueue();
 				if (t != null){
 					redirect(t);
 				}
 			}
 		}
+		
 	}
 
 	private void redirect(Transmission trans) {
@@ -40,14 +41,14 @@ public class ForwardDistributor implements Distributor {
 		String localOpcode;
 		try {
 			localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
-			System.out.print("OPCODE: " + localOpcode);
+			//System.out.print("OPCODE: " + localOpcode);
 			if (map.containsKey(localOpcode)) {
 				// This is a packet that needs to be forwarded
 				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
 				while (subsystemsToForwardTo.hasNext()) {
 					Addressable subSystem = subsystemsToForwardTo.next();
 					MailBox<Transmission> subSystemMailbox = (MailBox<Transmission>) subSystem.getMailBox();
-					System.out.println(".....REDIRECTED TO: " + subSystem.getClass());
+					//System.out.println(" ... redirected to : " + subSystem.getClass());
 					subSystemMailbox.putInInQueue(trans);
 				}
 			}

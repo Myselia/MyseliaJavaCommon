@@ -34,7 +34,6 @@ public class MailService implements Runnable {
      * @param subsystem	The subsystem registering (typically 'this')
      */
     public synchronized static void register(String opcode, Addressable subsystem) {
-    	System.out.println("registered addressable : " + subsystem.getClass().toString() + " to OPCODE: " + opcode);
     	registerAddressable(subsystem);
     	ArrayList<Addressable> a;
     	//First time field is accessed 
@@ -52,6 +51,7 @@ public class MailService implements Runnable {
      * @param subsystem
      */
     public synchronized static void registerAddressable(Addressable subsystem) {
+    	System.out.println("registered addressable : " + subsystem.getClass().toString());
     	if(!isRegistered(subsystem)){
     		systemList.add(subsystem);
     	}

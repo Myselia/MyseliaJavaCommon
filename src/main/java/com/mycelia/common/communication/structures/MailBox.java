@@ -45,7 +45,6 @@ public class MailBox<T> {
 	 * @param trans
 	 */
 	public synchronized void putInInQueue(T trans) {
-		System.out.println("DUDE");
 		in_queue.add(trans);
 	}
 	
@@ -54,8 +53,6 @@ public class MailBox<T> {
 	 * @param in_list
 	 */
 	public synchronized void putAllInInQueue(LinkedList<T> in_list){
-		System.out.println("MESS");
-		System.out.println("IN QUEUE SIZE AS STUFF IS BEING PUT IN : " + in_queue.size());
 		in_queue.addAll(in_list);
 		in_list.clear();
 	}
@@ -68,7 +65,7 @@ public class MailBox<T> {
 	 */
 	public synchronized T getFromOutQueue() {
 		if (this.getOutQueueSize() == 0) {
-			System.err.println("DIS BE NULL");
+			System.err.println("THIS OUT QUEUE IS NULL");
 			return null;
 		} else {
 			return out_queue.removeFirst();
@@ -81,7 +78,7 @@ public class MailBox<T> {
 	 */
 	public synchronized T getFromInQueue() {
 		if (this.getInQueueSize() == 0) {
-			System.err.println("DIS BE NULL");
+			System.err.println("THIS IN QUEUE IS NULL");
 			return null;
 		} else {
 			return in_queue.removeFirst();
@@ -109,7 +106,6 @@ public class MailBox<T> {
 	 * @return
 	 */
 	public synchronized LinkedList<T> getAllFromInQueue(){
-		System.out.println(in_queue.size());
 		return in_queue;
 	}
 	

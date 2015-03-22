@@ -75,6 +75,8 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					//sendTestPacket();
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
+							//System.out.println("||" + inputToken + "||");
+							//System.out.println("COMPONENT COMMUNICATOR GOT INPUT");
 							networkMailbox.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
 						}
 					}
@@ -91,6 +93,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					}
 					
 					handle_mailboxes();
+					
 				}
 
 			} catch (IOException e) {
@@ -102,10 +105,29 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	}
 	
 	private void handle_mailboxes() {
-		/*LinkedList<Transmission> bob = networkMailbox.getAllFromInQueue();
-		System.out.println("NETWORK MAILBOX PACKAGE GRAB SIZE : " + bob.size());*/
-		systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
-		networkMailbox.putAllInInQueue(systemMailbox.getAllFromOutQueue());
+		if(systemMailbox.getInQueueSize() > 0){
+			networkMailbox.putAllInOutQueue(systemMailbox.getAllFromInQueue());	
+			//check_component_communicator_mailboxes();
+		}
+		
+		if(networkMailbox.getInQueueSize() > 0){
+			systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
+			//check_component_communicator_mailboxes();
+		}
+	}
+	
+	/**
+	 * Debug function that checks the size of the mailboxes related to the ComponentCommunicator
+	 */
+	private void check_component_communicator_mailboxes() {
+		boolean check = false;
+		if(check){
+			System.out.println("Size of network in : " + networkMailbox.getInQueueSize());
+			System.out.println("Size of network out : " + networkMailbox.getOutQueueSize());
+			System.out.println("Size of system out : " + systemMailbox.getOutQueueSize());
+			System.out.println("Size of system in : " + systemMailbox.getInQueueSize());
+			System.out.println("--------------------------------------------------------");
+		}
 	}
 
 	@Override
