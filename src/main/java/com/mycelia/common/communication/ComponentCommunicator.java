@@ -10,6 +10,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.MailBox;
@@ -48,6 +49,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	public ComponentCommunicator(ComponentType componentType) {
 		ComponentCommunicator.componentType = componentType;
 		componentOp = OpcodeAccessor.getOpcodes(componentType);
+		MailService.registerAddressable(this);
 		bl = new BroadcastListener(componentType);
 		jsonInterpreter = new Gson();
 	}
@@ -74,7 +76,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
 							networkMailbox.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
-							//System.out.println("Received: " + jsonInterpreter.toJson(networkMailbox.getFromInQueue()));
 						}
 					}
 
@@ -101,6 +102,8 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	}
 	
 	private void handle_mailboxes() {
+		/*LinkedList<Transmission> bob = networkMailbox.getAllFromInQueue();
+		System.out.println("NETWORK MAILBOX PACKAGE GRAB SIZE : " + bob.size());*/
 		systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
 		networkMailbox.putAllInInQueue(systemMailbox.getAllFromOutQueue());
 	}

@@ -13,7 +13,7 @@ public class MailService implements Runnable {
     private Distributor distributor;
     private DistributorType distributorType;
     
-    static{
+    static {
         map = new HashMap<String, ArrayList<Addressable>>();
         systemList = new ArrayList<Addressable>();
     }
@@ -33,7 +33,7 @@ public class MailService implements Runnable {
      * @param opcode	The field to listen for updates to
      * @param subsystem	The subsystem registering (typically 'this')
      */
-    public static void register(String opcode, Addressable subsystem) {
+    public synchronized static void register(String opcode, Addressable subsystem) {
     	System.out.println("registered addressable : " + subsystem.getClass().toString() + " to OPCODE: " + opcode);
     	registerAddressable(subsystem);
     	ArrayList<Addressable> a;
@@ -51,7 +51,7 @@ public class MailService implements Runnable {
      * Registers the subsystem to the system list
      * @param subsystem
      */
-    public static void registerAddressable(Addressable subsystem) {
+    public synchronized static void registerAddressable(Addressable subsystem) {
     	if(!isRegistered(subsystem)){
     		systemList.add(subsystem);
     	}
