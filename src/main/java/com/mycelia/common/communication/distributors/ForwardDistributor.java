@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.mycelia.common.communication.Addressable;
+import com.mycelia.common.communication.MailService;
 import com.mycelia.common.communication.structures.MailBox;
 import com.mycelia.common.communication.units.Transmission;
+import com.mycelia.common.constants.opcode.ComponentType;
 import com.mycelia.common.constants.opcode.OpcodeAccessor;
 import com.mycelia.common.exceptions.MyceliaOpcodeException;
 
@@ -40,7 +42,10 @@ public class ForwardDistributor implements Distributor {
 		String fromOpcode = trans.get_header().get_from();
 		String localOpcode;
 		try {
-			localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
+			if (MailService.getComponentType() == ComponentType.STEM)
+				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
+			else 
+				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
 			//System.out.print("OPCODE: " + localOpcode);
 			if (map.containsKey(localOpcode)) {
 				// This is a packet that needs to be forwarded

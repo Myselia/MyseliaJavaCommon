@@ -10,7 +10,6 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.MailBox;
