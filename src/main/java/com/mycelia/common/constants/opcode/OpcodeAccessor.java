@@ -73,6 +73,12 @@ public class OpcodeAccessor {
 
 		return ((Enum<?>)opCode[1]).toString() + SEPARATOR + opCode[2];
 	}
+	
+	public static String getComponentOpcode(String s) throws MyceliaOpcodeException {
+		Object[] opCode = retrieve(s);
+
+		return ((Enum<?>)opCode[0]).toString();
+	}
 
 	public static Operation getOpcodes(ComponentType t) {
 		Operation operation = null;

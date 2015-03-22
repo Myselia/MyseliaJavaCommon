@@ -6,12 +6,15 @@ import java.util.HashMap;
 import com.mycelia.common.communication.distributors.Distributor;
 import com.mycelia.common.communication.distributors.DistributorFactory;
 import com.mycelia.common.communication.distributors.DistributorType;
+import com.mycelia.common.constants.opcode.ComponentType;
 
 public class MailService implements Runnable {
     private static HashMap<String, ArrayList<Addressable>> map;
     private static ArrayList<Addressable> systemList;
+    private static ComponentType componentType;
     private Distributor distributor;
     private DistributorType distributorType;
+   
     
     static {
         map = new HashMap<String, ArrayList<Addressable>>();
@@ -22,8 +25,9 @@ public class MailService implements Runnable {
      * Mail service constructor that sets a distributor type
      * @param distributorType
      */
-    public MailService(DistributorType distributorType) {
+    public MailService(DistributorType distributorType, ComponentType componentType) {
     	this.distributorType = distributorType;
+    	MailService.componentType = componentType;
         
         initialize_distributor();    
     }
@@ -51,9 +55,9 @@ public class MailService implements Runnable {
      * @param subsystem
      */
     public synchronized static void registerAddressable(Addressable subsystem) {
-    	System.out.println("registered addressable : " + subsystem.getClass().toString());
     	if(!isRegistered(subsystem)){
     		systemList.add(subsystem);
+    		System.out.println("registered addressable : " + subsystem.getClass().toString());
     	}
     }
     
@@ -103,6 +107,10 @@ public class MailService implements Runnable {
 			this.distributorType = distributorType;
 			initialize_distributor();
 		}
+	}
+	
+	public static ComponentType getComponentType() {
+		return componentType;
 	}
     
 	/**
