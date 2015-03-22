@@ -27,21 +27,22 @@ public class ForwardDistributor implements Distributor {
 		ArrayList<Addressable> copylist = systemList;
 		for (Addressable subSystem : copylist) {
 			MailBox<Transmission> mail = null;
-			try{
+			try {
 				mail = (MailBox<Transmission>) subSystem.getMailBox();
-				//System.out.println("got a mailbox");
-			} catch(Exception e){
+				// System.out.println("got a mailbox");
+			} catch (Exception e) {
 				System.err.println("HERE LIES ERROR");
+				e.printStackTrace();
 			}
-			if (mail.getOutQueueSize() > 0) {
-				//System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
+			if (mail != null && mail.getOutQueueSize() > 0) {
+				System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
 				Transmission t = mail.getFromOutQueue();
-				if (t != null){
+				if (t != null) {
 					redirect(t);
 				}
 			}
 		}
-		
+
 	}
 
 	private void redirect(Transmission trans) {
@@ -49,17 +50,17 @@ public class ForwardDistributor implements Distributor {
 		String localOpcode;
 		try {
 			if (MailService.getComponentType() == ComponentType.STEM)
-				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
-			else 
 				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
-			//System.out.print("OPCODE: " + localOpcode);
+			else 
+				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
+			System.out.print("OPCODE: " + localOpcode);
 			if (map.containsKey(localOpcode)) {
 				// This is a packet that needs to be forwarded
 				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
 				while (subsystemsToForwardTo.hasNext()) {
 					Addressable subSystem = subsystemsToForwardTo.next();
 					MailBox<Transmission> subSystemMailbox = (MailBox<Transmission>) subSystem.getMailBox();
-					//System.out.println(" ... redirected to : " + subSystem.getClass());
+					System.out.println(" ... redirected to : " + subSystem.getClass());
 					subSystemMailbox.putInInQueue(trans);
 				}
 			}

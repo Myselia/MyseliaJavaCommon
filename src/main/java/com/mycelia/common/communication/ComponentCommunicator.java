@@ -48,7 +48,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	public ComponentCommunicator(ComponentType componentType) {
 		ComponentCommunicator.componentType = componentType;
 		componentOp = OpcodeAccessor.getOpcodes(componentType);
-		MailService.registerAddressable(this);
 		bl = new BroadcastListener(componentType);
 		jsonInterpreter = new Gson();
 	}
@@ -106,12 +105,12 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	private void handle_mailboxes() {
 		if(systemMailbox.getInQueueSize() > 0){
 			networkMailbox.putAllInOutQueue(systemMailbox.getAllFromInQueue());	
-			//check_component_communicator_mailboxes();
+			check_component_communicator_mailboxes();
 		}
 		
 		if(networkMailbox.getInQueueSize() > 0){
 			systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
-			//check_component_communicator_mailboxes();
+			check_component_communicator_mailboxes();
 		}
 	}
 	
@@ -119,7 +118,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	 * Debug function that checks the size of the mailboxes related to the ComponentCommunicator
 	 */
 	private void check_component_communicator_mailboxes() {
-		boolean check = false;
+		boolean check = true;
 		if(check){
 			System.out.println("Size of network in : " + networkMailbox.getInQueueSize());
 			System.out.println("Size of network out : " + networkMailbox.getOutQueueSize());
