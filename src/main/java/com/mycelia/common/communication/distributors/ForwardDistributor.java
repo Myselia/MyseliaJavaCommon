@@ -24,7 +24,13 @@ public class ForwardDistributor implements Distributor {
 	public void tick() {
 		ArrayList<Addressable> copylist = systemList;
 		for (Addressable subSystem : copylist) {
-			MailBox<Transmission> mail = (MailBox<Transmission>) subSystem.getMailBox();
+			MailBox<Transmission> mail = null;
+			try{
+				mail = (MailBox<Transmission>) subSystem.getMailBox();
+				//System.out.println("got a mailbox");
+			} catch(Exception e){
+				System.err.println("HERE LIES ERROR");
+			}
 			if (mail.getOutQueueSize() > 0) {
 				//System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
 				Transmission t = mail.getFromOutQueue();
