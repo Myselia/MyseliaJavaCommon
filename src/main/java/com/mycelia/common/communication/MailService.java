@@ -109,7 +109,7 @@ public class MailService implements Runnable {
 		}
 	}
 	
-	public static ComponentT	ype getComponentType() {
+	public static ComponentType getComponentType() {
 		return componentType;
 	}
     
