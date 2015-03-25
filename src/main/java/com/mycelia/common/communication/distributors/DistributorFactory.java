@@ -1,7 +1,9 @@
 package com.mycelia.common.communication.distributors;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.mycelia.common.communication.Addressable;
 
@@ -15,20 +17,20 @@ public class DistributorFactory {
 	 * @param systemList
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static Distributor makeDistributor(DistributorType distributorType,
-			HashMap<String, ArrayList<Addressable>> map,
-			ArrayList<Addressable> systemList) {
+			Map<?, ?> map,
+			List<?> systemList) {
 		
 		switch (distributorType) {
 		case FORWARDER:
-			return new ForwardDistributor(map, systemList);
+			return new ForwardDistributor((HashMap<String, CopyOnWriteArrayList<Addressable>>)map, (CopyOnWriteArrayList<Addressable>)systemList);
 		case LOAD_BALANCER:
 			return new LoadBalanceDistributor();
 		default:
-			break;
+			return null;
 		}
-
-		return null;
+		
 	}
 
 }

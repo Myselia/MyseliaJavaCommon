@@ -1,8 +1,8 @@
 package com.mycelia.common.communication.distributors;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.mycelia.common.communication.Addressable;
 import com.mycelia.common.communication.MailService;
@@ -14,17 +14,17 @@ import com.mycelia.common.exceptions.MyceliaOpcodeException;
 
 public class ForwardDistributor implements Distributor {
 
-	private HashMap<String, ArrayList<Addressable>> map;
-	private ArrayList<Addressable> systemList;
+	private HashMap<String, CopyOnWriteArrayList<Addressable>> map;
+	private CopyOnWriteArrayList<Addressable> systemList;
 	
-	public ForwardDistributor(HashMap<String, ArrayList<Addressable>> map, ArrayList<Addressable> systemList) {
+	public ForwardDistributor(HashMap<String, CopyOnWriteArrayList<Addressable>> map, CopyOnWriteArrayList<Addressable> systemList) {
 		this.map = map;
 		this.systemList = systemList;
 	}
 
 	@Override
 	public void tick() {
-		ArrayList<Addressable> copylist = systemList;
+		CopyOnWriteArrayList<Addressable> copylist = systemList;
 		for (Addressable subSystem : copylist) {
 			MailBox<Transmission> mail = null;
 			try {

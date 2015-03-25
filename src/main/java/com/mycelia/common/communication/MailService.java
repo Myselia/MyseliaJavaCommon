@@ -1,7 +1,7 @@
 package com.mycelia.common.communication;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.mycelia.common.communication.distributors.Distributor;
 import com.mycelia.common.communication.distributors.DistributorFactory;
@@ -9,16 +9,16 @@ import com.mycelia.common.communication.distributors.DistributorType;
 import com.mycelia.common.constants.opcode.ComponentType;
 
 public class MailService implements Runnable {
-    private static HashMap<String, ArrayList<Addressable>> map;
-    private static ArrayList<Addressable> systemList;
+    private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
+    private static CopyOnWriteArrayList<Addressable> systemList;
     private static ComponentType componentType;
     private Distributor distributor;
     private DistributorType distributorType;
    
     
     static {
-        map = new HashMap<String, ArrayList<Addressable>>();
-        systemList = new ArrayList<Addressable>();
+        map = new HashMap<String, CopyOnWriteArrayList<Addressable>>();
+        systemList = new CopyOnWriteArrayList<Addressable>();
     }
      
     /**
@@ -39,10 +39,10 @@ public class MailService implements Runnable {
      */
     public synchronized static void register(String opcode, Addressable subsystem) {
     	registerAddressable(subsystem);
-    	ArrayList<Addressable> a;
+    	CopyOnWriteArrayList<Addressable> a;
     	//First time field is accessed 
     	if (map.get(opcode) == null) {
-    		a = new ArrayList<Addressable>();
+    		a = new CopyOnWriteArrayList<Addressable>();
     		map.put(opcode, a);
     	} else {
     		a = map.get(opcode);
@@ -67,7 +67,7 @@ public class MailService implements Runnable {
      * @param subsystem
      */
     public void unregister(String field, Addressable subsystem) {
-		ArrayList<Addressable> subscriberList;
+    	CopyOnWriteArrayList<Addressable> subscriberList;
 		if ((map.get(field) != null)) {
 			subscriberList = map.get(field);
 			if (subscriberList.contains(subsystem)) {
@@ -94,7 +94,7 @@ public class MailService implements Runnable {
 	 * getter for the mappings of the fields to addressable units
 	 * @return
 	 */
-	public HashMap<String, ArrayList<Addressable>> getMap() {
+	public HashMap<String, CopyOnWriteArrayList<Addressable>> getMap() {
 		return map;
 	}
 
