@@ -29,7 +29,6 @@ public class ForwardDistributor implements Distributor {
 			MailBox<Transmission> mail = null;
 			try {
 				mail = (MailBox<Transmission>) subSystem.getMailBox();
-				// System.out.println("got a mailbox");
 			} catch (Exception e) {
 				System.err.println("HERE LIES ERROR");
 				e.printStackTrace();
@@ -47,14 +46,16 @@ public class ForwardDistributor implements Distributor {
 
 	private void redirect(Transmission trans) {
 		String fromOpcode = trans.get_header().get_from();
+		System.out.println("From is: " +fromOpcode);
 		String localOpcode;
 		try {
 			if (MailService.getComponentType() == ComponentType.STEM)
 				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
 			else 
 				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
-			System.out.print("OPCODE: " + localOpcode);
+			System.out.println("OPCODE: " + localOpcode);
 			if (map.containsKey(localOpcode)) {
+				System.out.println("FORWARD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				// This is a packet that needs to be forwarded
 				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
 				while (subsystemsToForwardTo.hasNext()) {

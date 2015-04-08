@@ -84,6 +84,32 @@ public class MailBox<T> {
 			return in_queue.removeFirst();
 		}
 	}
+	
+	/**
+	 * Gets the next element that needs to be transmitted Return null if the
+	 * queue is empty
+	 * 
+	 * @return transmission
+	 */
+	public synchronized T peekOutQueue() {
+		if (this.getOutQueueSize() == 0) {
+			return null;
+		} else {
+			return out_queue.getFirst();
+		}
+	}
+
+	/**
+	 * Returns the next available transmission that was received
+	 * @return transmission
+	 */
+	public synchronized T peekInQueue() {
+		if (this.getInQueueSize() == 0) {
+			return null;
+		} else {
+			return in_queue.getFirst();
+		}
+	}
 
 	/**
 	 * Returns the size of the incoming queue

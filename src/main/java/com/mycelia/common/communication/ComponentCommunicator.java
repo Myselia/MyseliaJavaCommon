@@ -10,6 +10,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import com.google.gson.Gson;
 import com.mycelia.common.communication.structures.MailBox;
@@ -199,15 +200,14 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
 			String from = OpcodeAccessor.make(componentType, ActionType.SETUP, componentOp.SEND_SETUP);
-			String to = OpcodeAccessor.make(ComponentType.STEM, ActionType.SETUP, StemOperation.ACCEPT_SETUP);
+			String to = OpcodeAccessor.make(ComponentType.STEM, ActionType.SETUP, StemOperation.SETUP);
 			tb.newTransmission(from, to);
-			InetAddress ip = Inet4Address.getLocalHost();
-			System.out.print(ip);
+			String[] ifaceInfo = getInterfaceInformation();
 			
-			tb.addAtom("ip", "String", ip.toString());
+			tb.addAtom("ip", "String", ifaceInfo[1]);
 			tb.addAtom("type", "String", componentType.toString());
-			tb.addAtom("mac", "String", getMac(ip));
-			tb.addAtom("hashID", "String", Integer.toString((ip + getMac(ip)).hashCode()));
+			tb.addAtom("mac", "String", ifaceInfo[0]);
+			tb.addAtom("hashID", "String",  Integer.toString((ifaceInfo[1] + ifaceInfo[0]).hashCode()));
 		
 			Transmission trans = tb.getTransmission();
 			output.println(jsonInterpreter.toJson(trans));
@@ -251,6 +251,33 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		return sb.toString();
 	}
 
+	/**
+	 * 0	:	MAC
+	 * 1	:	IP
+	 */
+	private String[] getInterfaceInformation() {
+		String[] info = new String[2];
+	    try {
+	        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+	        while (interfaces.hasMoreElements()) {
+	            NetworkInterface iface = interfaces.nextElement();
+	            // filters out 127.0.0.1 and inactive interfaces
+	            if (iface.isLoopback() || !iface.isUp())
+	                continue;
+
+	            info[0] = new String(iface.getHardwareAddress());
+	            Enumeration<InetAddress> addresses = iface.getInetAddresses();
+	            while(addresses.hasMoreElements()) {
+	                InetAddress addr = addresses.nextElement();
+	                info[1] = addr.getHostAddress();
+	            }
+	        }
+	    } catch (SocketException e) {
+	        throw new RuntimeException(e);
+	    }
+	    
+	    return info;
+	}
 	@Override
 	public MailBox<Transmission> getMailBox() {
 		return systemMailbox;
