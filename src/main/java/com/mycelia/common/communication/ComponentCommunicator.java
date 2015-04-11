@@ -83,6 +83,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					// Send Packets
 					if (!output.checkError()) {
 						if (networkMailbox.getOutQueueSize() > 0) {
+							System.out.println("Sending shit to stem");
 							outputToken = jsonInterpreter.toJson(networkMailbox.getFromOutQueue());
 							output.println(outputToken);
 						}
