@@ -12,7 +12,8 @@ import com.mycelia.common.constants.opcode.ComponentType;
 
 public class BroadcastListener {
 
-	private static int port = 42068;
+	private static int externalListenPort = 42068;
+	private static int internalListenPort = 42065;
 	private ComponentType componenttype;
 	
 	private DatagramSocket socket;
@@ -32,7 +33,13 @@ public class BroadcastListener {
 	 */
 	public Transmission listen(int length){
 		Gson g = new Gson();
-	    setupSocket();
+		
+		if(componenttype == ComponentType.SANDBOXSLAVE){
+			setupSocket(false);
+		} else {
+			setupSocket(true);
+		}
+	    
 	    Transmission trans = new Transmission();
 	    byte[] buffer;
 	    DatagramPacket packet;
@@ -97,9 +104,13 @@ public class BroadcastListener {
 		return CORRECT;
 	}
 	
-	private void setupSocket() {
+	private void setupSocket(boolean external) {
 		try{
-			this.socket = new DatagramSocket(port);
+			if(external){
+				this.socket = new DatagramSocket(externalListenPort);
+			} else {
+				this.socket = new DatagramSocket(internalListenPort);
+			}
 			socket.setBroadcast(true);
 		}catch(IOException e){
 			System.err.println("BroadcastListener: Connection failed.");
