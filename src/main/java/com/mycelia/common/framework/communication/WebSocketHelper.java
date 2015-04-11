@@ -76,7 +76,7 @@ public class WebSocketHelper {
 		return replyWebSocketFrame;
 	}
 
-	public static String decodeWebSocketPayload(byte[] framedPacket, int bytesRead) {
+	public static byte[] decodeWebSocketPayload(byte[] framedPacket, int bytesRead) {
 		byte[] message;
 		byte rLength = 0;
 		int totalMessageLength;
@@ -110,7 +110,7 @@ public class WebSocketHelper {
 			message[j] = (byte) (framedPacket[i] ^ masks[j % 4]);
 		}
 
-		return new String(message);
+		return message;
 	}
 
 	private static void printBytes(byte[] b) {
@@ -129,6 +129,19 @@ public class WebSocketHelper {
 		o.flush();
 	}
 	
+	public static boolean isEndStreamSignal(byte[] bytePayload) {
+		if (bytePayload[0] == (byte)3 && bytePayload[1] == (byte)233)
+			return true;
+		return false;
+	}
+	
+	public static void printHex(byte[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			System.out.format(i + " : " + "0x%02X", arr[i]);
+			System.out.println();
+		}
+		
+	}
 	private static String generateOK(String key) {
 		Encoder encoder = Base64.getEncoder();
 		String genWith = key + webSocketUID;
