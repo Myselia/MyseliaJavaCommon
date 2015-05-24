@@ -24,8 +24,8 @@ public class ForwardDistributor implements Distributor {
 
 	@Override
 	public void tick() {
-		CopyOnWriteArrayList<Addressable> copylist = systemList;
-		for (Addressable subSystem : copylist) {
+		//CopyOnWriteArrayList<Addressable> copylist = systemList;
+		for (Addressable subSystem : systemList) {
 			MailBox<Transmission> mail = null;
 			try {
 				mail = (MailBox<Transmission>) subSystem.getMailBox();
@@ -34,7 +34,6 @@ public class ForwardDistributor implements Distributor {
 				e.printStackTrace();
 			}
 			if (mail != null && mail.getOutQueueSize() > 0) {
-				System.out.println("found a mailbox with over 0 transmissions : " + subSystem.getClass().toString());
 				Transmission t = mail.getFromOutQueue();
 				if (t != null) {
 					redirect(t);
@@ -46,22 +45,19 @@ public class ForwardDistributor implements Distributor {
 
 	private void redirect(Transmission trans) {
 		String fromOpcode = trans.get_header().get_from();
-		System.out.println("From is: " +fromOpcode);
 		String localOpcode;
 		try {
 			if (MailService.getComponentType() == ComponentType.STEM)
 				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
 			else 
 				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
-			System.out.println("OPCODE: " + localOpcode);
 			if (map.containsKey(localOpcode)) {
-				System.out.println("FORWARD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				// This is a packet that needs to be forwarded
 				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
 				while (subsystemsToForwardTo.hasNext()) {
 					Addressable subSystem = subsystemsToForwardTo.next();
 					MailBox<Transmission> subSystemMailbox = (MailBox<Transmission>) subSystem.getMailBox();
-					System.out.println(" ... redirected to : " + subSystem.getClass());
+					System.out.println("~!!!!!!!!!!!!!!FORWARD!!!!!!!!!!!!!!~");
 					subSystemMailbox.putInInQueue(trans);
 				}
 			}
