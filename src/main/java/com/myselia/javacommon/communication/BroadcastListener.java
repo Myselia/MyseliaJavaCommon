@@ -1,4 +1,4 @@
-package com.myselia.javacommon.communication.tools;
+package com.myselia.javacommon.communication;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

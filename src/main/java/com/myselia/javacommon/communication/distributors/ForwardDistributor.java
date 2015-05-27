@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.myselia.javacommon.communication.Addressable;
-import com.myselia.javacommon.communication.MailService;
-import com.myselia.javacommon.communication.structures.MailBox;
+import com.myselia.javacommon.communication.mail.Addressable;
+import com.myselia.javacommon.communication.mail.MailBox;
+import com.myselia.javacommon.communication.mail.MailService;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeAccessor;

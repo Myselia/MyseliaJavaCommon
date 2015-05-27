@@ -1,4 +1,4 @@
-package com.myselia.javacommon.communication;
+package com.myselia.javacommon.communication.mail;
 
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;

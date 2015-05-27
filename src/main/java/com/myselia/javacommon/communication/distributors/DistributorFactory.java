@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.myselia.javacommon.communication.Addressable;
+import com.myselia.javacommon.communication.mail.Addressable;
 
 public class DistributorFactory {
 

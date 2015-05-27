@@ -1,4 +1,4 @@
-package com.myselia.javacommon.communication.structures;
+package com.myselia.javacommon.communication.mail;
 
 import java.util.LinkedList;
 

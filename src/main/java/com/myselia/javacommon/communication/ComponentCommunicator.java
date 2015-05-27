@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import com.google.gson.Gson;
-import com.myselia.javacommon.communication.structures.MailBox;
-import com.myselia.javacommon.communication.tools.BroadcastListener;
+import com.myselia.javacommon.communication.mail.Addressable;
+import com.myselia.javacommon.communication.mail.MailBox;
 import com.myselia.javacommon.communication.units.Atom;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.communication.units.TransmissionBuilder;
