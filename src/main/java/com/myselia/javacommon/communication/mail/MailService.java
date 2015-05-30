@@ -1,19 +1,21 @@
 package com.myselia.javacommon.communication.mail;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.myselia.javacommon.communication.distributors.Distributor;
 import com.myselia.javacommon.communication.distributors.DistributorFactory;
 import com.myselia.javacommon.communication.distributors.DistributorType;
+import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
+import com.myselia.javacommon.constants.opcode.OpcodeAccessor;
+import com.myselia.javacommon.exceptions.MyceliaOpcodeException;
 
-public class MailService implements Runnable {
+public class MailService implements Runnable{
     private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
     private static CopyOnWriteArrayList<Addressable> systemList;
     private static ComponentType componentType;
-    private Distributor distributor;
-    private DistributorType distributorType;
    
     
     static {
@@ -25,11 +27,8 @@ public class MailService implements Runnable {
      * Mail service constructor that sets a distributor type
      * @param distributorType
      */
-    public MailService(DistributorType distributorType, ComponentType componentType) {
-    	this.distributorType = distributorType;
-    	MailService.componentType = componentType;
-        
-        initialize_distributor();    
+    public MailService(ComponentType componentType) {
+    	MailService.componentType = componentType; 
     }
     
     /**
@@ -99,34 +98,49 @@ public class MailService implements Runnable {
 	}
 
 	/**
-	 * swaps the distributor for a different one based on 
-	 * @param distributorType
+	 * getter for the component type that instantiated this MailService
+	 * @return
 	 */
-	public void swapDistributor(DistributorType distributorType) {
-		if(this.distributorType != distributorType){
-			this.distributorType = distributorType;
-			initialize_distributor();
-		}
-	}
-	
 	public static ComponentType getComponentType() {
 		return componentType;
 	}
-    
+	
 	/**
-	 * initializes the distributor to whatever type was preset
+	 * Notifies the MailService that there is a transmission in a certain mailbox
+	 * @param addressable
 	 */
-    private void initialize_distributor(){
-        distributor = DistributorFactory.makeDistributor(distributorType, map, systemList);
-    }
-
-    /**
-     * run method that loops through the distributor's tick
-     */
-	@Override
-	public void run() {
-		while (!Thread.currentThread().isInterrupted()) {
-			distributor.tick();
+	public static void notify(Addressable addressable){
+		redirect((Transmission)addressable.getMailBox().getFromOutQueue());		
+	}
+	
+	private static void redirect(Transmission trans) {
+		String fromOpcode = trans.get_header().get_from();
+		String localOpcode;
+		try {
+			if (MailService.getComponentType() == ComponentType.STEM)
+				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
+			else 
+				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
+			if (map.containsKey(localOpcode)) {
+				// This is a packet that needs to be forwarded
+				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
+				while (subsystemsToForwardTo.hasNext()) {
+					Addressable subSystem = subsystemsToForwardTo.next();
+					@SuppressWarnings("unchecked")
+					MailBox<Transmission> subSystemMailbox = (MailBox<Transmission>) subSystem.getMailBox();
+					System.out.println("~!!!!!!!!!!!!!!FORWARD!!!!!!!!!!!!!!~");
+					subSystemMailbox.putInInQueue(trans);
+				}
+			}
+		} catch (MyceliaOpcodeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void run() {
+		
+	}
+
 }

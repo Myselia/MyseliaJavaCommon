@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import com.google.gson.Gson;
 import com.myselia.javacommon.communication.mail.Addressable;
 import com.myselia.javacommon.communication.mail.MailBox;
+import com.myselia.javacommon.communication.mail.MailService;
 import com.myselia.javacommon.communication.units.Atom;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.communication.units.TransmissionBuilder;
@@ -92,8 +93,11 @@ public class ComponentCommunicator implements Runnable, Addressable{
 						throw new IOException();
 					}
 					
-					handle_mailboxes();
-					
+					//redirect network incoming to system outgoing if there's something to redirect
+					if(networkMailbox.getInQueueSize() > 0){
+						systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
+						MailService.notify(this);
+					}
 				}
 
 			} catch (IOException e) {
@@ -103,24 +107,12 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			} 
 		}
 	}
-	
-	private void handle_mailboxes() {
-		if(systemMailbox.getInQueueSize() > 0){
-			networkMailbox.putAllInOutQueue(systemMailbox.getAllFromInQueue());	
-			check_component_communicator_mailboxes();
-		}
-		
-		if(networkMailbox.getInQueueSize() > 0){
-			systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
-			check_component_communicator_mailboxes();
-		}
-	}
-	
+
 	/**
 	 * Debug function that checks the size of the mailboxes related to the ComponentCommunicator
 	 */
 	private void check_component_communicator_mailboxes() {
-		boolean check = true;
+		boolean check = false;
 		if(check){
 			System.out.println("Size of network in : " + networkMailbox.getInQueueSize());
 			System.out.println("Size of network out : " + networkMailbox.getOutQueueSize());
@@ -231,6 +223,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 
 			Transmission trans = tb.getTransmission();
 			networkMailbox.putInOutQueue(trans);
+			MailService.notify(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -279,9 +272,20 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	    
 	    return info;
 	}
+	
 	@Override
 	public MailBox<Transmission> getMailBox() {
 		return systemMailbox;
+	}
+
+	@Override
+	public void notifyIncomingMail() {
+		
+		if(systemMailbox.getInQueueSize() > 0){
+			networkMailbox.putAllInOutQueue(systemMailbox.getAllFromInQueue());	
+		}else{
+			System.err.println("Null incoming mailbox was still called...");
+		}
 	}
 
 }

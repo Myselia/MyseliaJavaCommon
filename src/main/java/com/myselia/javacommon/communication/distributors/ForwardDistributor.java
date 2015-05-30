@@ -22,6 +22,7 @@ public class ForwardDistributor implements Distributor {
 		this.systemList = systemList;
 	}
 
+	/*
 	@Override
 	public void tick() {
 		//CopyOnWriteArrayList<Addressable> copylist = systemList;
@@ -42,6 +43,7 @@ public class ForwardDistributor implements Distributor {
 		}
 
 	}
+	*/
 
 	private void redirect(Transmission trans) {
 		String fromOpcode = trans.get_header().get_from();

@@ -25,8 +25,6 @@ public class DistributorFactory {
 		switch (distributorType) {
 		case FORWARDER:
 			return new ForwardDistributor((HashMap<String, CopyOnWriteArrayList<Addressable>>)map, (CopyOnWriteArrayList<Addressable>)systemList);
-		case LOAD_BALANCER:
-			return new LoadBalanceDistributor();
 		default:
 			return null;
 		}
