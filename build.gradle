@@ -7,7 +7,7 @@ apply plugin: 'eclipse'
 
 defaultTasks 'tasks'
 
-group='com.mycelia'
+group='com.myselia'
 version = "1.0"
 archivesBaseName = project.name
 
@@ -28,6 +28,9 @@ dependencies {
 	
 	//Serialization tool
 	compile 'commons-lang:commons-lang:2.3'
+	
+	//Network tool
+	compile 'io.netty:netty-all:5.0.0.Alpha2'
 	
 }
 
