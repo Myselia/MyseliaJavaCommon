@@ -29,6 +29,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	
 	private static MailBox<Transmission> networkMailbox;
 	private static MailBox<Transmission> systemMailbox;
+	
 	private static ComponentType componentType;
 	private static Operation componentOp;
 	private BroadcastListener bl;
@@ -72,20 +73,18 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			try {
 
 				while (CONNECTED) {
-					//sendTestPacket();
+
+					//Receive Packets
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
-							//System.out.println("||" + inputToken + "||");
-							//System.out.println("COMPONENT COMMUNICATOR GOT INPUT");
-							networkMailbox.putInInQueue(jsonInterpreter.fromJson(inputToken, Transmission.class));
+							networkMailbox.enqueueIn(jsonInterpreter.fromJson(inputToken, Transmission.class));
 						}
 					}
 
 					// Send Packets
 					if (!output.checkError()) {
-						if (networkMailbox.getOutQueueSize() > 0) {
-							System.out.println("Sending shit to stem");
-							outputToken = jsonInterpreter.toJson(networkMailbox.getFromOutQueue());
+						if (networkMailbox.getOutSize() > 0) {
+							outputToken = jsonInterpreter.toJson(networkMailbox.dequeueOut());
 							output.println(outputToken);
 						}
 					} else {
@@ -93,11 +92,9 @@ public class ComponentCommunicator implements Runnable, Addressable{
 						throw new IOException();
 					}
 					
-					//redirect network incoming to system outgoing if there's something to redirect
-					if(networkMailbox.getInQueueSize() > 0){
-						systemMailbox.putAllInOutQueue(networkMailbox.getAllFromInQueue());
-						MailService.notify(this);
-					}
+					//Redirect system/network mailbox contents
+					handleMailBoxPair();
+
 				}
 
 			} catch (IOException e) {
@@ -108,19 +105,19 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		}
 	}
 
-	/**
-	 * Debug function that checks the size of the mailboxes related to the ComponentCommunicator
-	 */
-	private void check_component_communicator_mailboxes() {
-		boolean check = false;
-		if(check){
-			System.out.println("Size of network in : " + networkMailbox.getInQueueSize());
-			System.out.println("Size of network out : " + networkMailbox.getOutQueueSize());
-			System.out.println("Size of system out : " + systemMailbox.getOutQueueSize());
-			System.out.println("Size of system in : " + systemMailbox.getInQueueSize());
-			System.out.println("--------------------------------------------------------");
+	public void handleMailBoxPair(){
+		//re-routing network in to system out
+		if(networkMailbox.getInSize() > 0){
+			systemMailbox.enqueueOut(networkMailbox.dequeueIn());
+			MailService.notify(this);
+		}
+		
+		//re-routing system in to network out
+		if(systemMailbox.getInSize() > 0){
+			networkMailbox.enqueueOut(systemMailbox.dequeueIn());
 		}
 	}
+	
 
 	@Override
 	public void run() {
@@ -215,6 +212,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	/**
 	 * Test packet building method
 	 */
+	/*
 	private void sendTestPacket(){
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
@@ -222,19 +220,20 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			tb.addAtom("count", "String", "5");
 
 			Transmission trans = tb.getTransmission();
-			networkMailbox.putInOutQueue(trans);
+			networkMailbox.enqueueOut(trans);
 			MailService.notify(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 	/**
 	 * Method that returns the MAC address of the InetAddress in question
 	 * @param ia
 	 * @return String (MAC)
 	 * @throws SocketException
 	 */
+	/*
 	private String getMac(InetAddress ia) throws SocketException {
 		NetworkInterface network = NetworkInterface.getByInetAddress(ia);
 		byte[] mac = network.getHardwareAddress();
@@ -244,6 +243,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		}
 		return sb.toString();
 	}
+	*/
 
 	/**
 	 * 0	:	MAC
@@ -272,20 +272,15 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	    
 	    return info;
 	}
-	
-	@Override
-	public MailBox<Transmission> getMailBox() {
-		return systemMailbox;
-	}
 
 	@Override
-	public void notifyIncomingMail() {
-		
-		if(systemMailbox.getInQueueSize() > 0){
-			networkMailbox.putAllInOutQueue(systemMailbox.getAllFromInQueue());	
-		}else{
-			System.err.println("Null incoming mailbox was still called...");
-		}
+	public void in(Transmission trans) {
+		systemMailbox.enqueueIn(trans);
+	}
+	
+	@Override
+	public Transmission out(){
+		return systemMailbox.dequeueOut();
 	}
 
 }

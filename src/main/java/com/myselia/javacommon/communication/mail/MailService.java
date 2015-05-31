@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.myselia.javacommon.communication.distributors.Distributor;
-import com.myselia.javacommon.communication.distributors.DistributorFactory;
-import com.myselia.javacommon.communication.distributors.DistributorType;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeAccessor;
@@ -110,7 +107,8 @@ public class MailService implements Runnable{
 	 * @param addressable
 	 */
 	public static void notify(Addressable addressable){
-		redirect((Transmission)addressable.getMailBox().getFromOutQueue());		
+		//System.out.println("Mail Service: Notified!");
+		redirect(addressable.out());
 	}
 	
 	private static void redirect(Transmission trans) {
@@ -126,14 +124,11 @@ public class MailService implements Runnable{
 				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
 				while (subsystemsToForwardTo.hasNext()) {
 					Addressable subSystem = subsystemsToForwardTo.next();
-					@SuppressWarnings("unchecked")
-					MailBox<Transmission> subSystemMailbox = (MailBox<Transmission>) subSystem.getMailBox();
-					System.out.println("~!!!!!!!!!!!!!!FORWARD!!!!!!!!!!!!!!~");
-					subSystemMailbox.putInInQueue(trans);
+					subSystem.in(trans);
+					System.out.println("Mail Service: Redirected!");
 				}
 			}
 		} catch (MyceliaOpcodeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

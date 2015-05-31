@@ -11,73 +11,30 @@ public class MailBox<T> {
 	}
 
 	/**
-	 * Adds a new Transmission to the outgoing queue This Transmission will be
-	 * sent as soon as it becomes the next element
-	 * 
-	 * @param trans
-	 */
-	public synchronized void putInOutQueue(T trans) {
-		out_queue.add(trans);
-	}
-
-	/**
-	 * Adds a new Transmission to the head of the outgoing queue This
-	 * Transmission is the next in line to be sent
-	 * 
-	 * @param trans
-	 */
-	public synchronized void putInOutQueueTop(T trans) {
-		out_queue.add(0, trans);
-	}
-	
-	/**
-	 * Adds all the elements of the given list into the out queue
-	 * @param out_list
-	 */
-	public synchronized void putAllInOutQueue(LinkedList<T> out_list){
-		out_queue.addAll(out_list);
-		out_list.clear();
-	}
-
-	/**
 	 * Adds the transmission to the incoming queue
 	 * The transmission will be processed as soon as it becomes the next item that is being polled
 	 * @param trans
 	 */
-	public synchronized void putInInQueue(T trans) {
-		in_queue.add(trans);
+	public synchronized void enqueueIn(T t) {
+		in_queue.add(t);
 	}
 	
 	/**
-	 * Adds all the elements on the given list into the in queue
-	 * @param in_list
-	 */
-	public synchronized void putAllInInQueue(LinkedList<T> in_list){
-		in_queue.addAll(in_list);
-		in_list.clear();
-	}
-	
-	/**
-	 * Gets the next element that needs to be transmitted Return null if the
-	 * queue is empty
+	 * Adds a new Item to the head of the incoming queue This
+	 * Item is the next in line to be sent
 	 * 
-	 * @return transmission
+	 * @param trans
 	 */
-	public synchronized T getFromOutQueue() {
-		if (this.getOutQueueSize() == 0) {
-			System.err.println("THIS OUT QUEUE IS NULL");
-			return null;
-		} else {
-			return out_queue.removeFirst();
-		}
+	public synchronized void enqueueInPriority(T t) {
+		in_queue.add(0, t);
 	}
-
+	
 	/**
-	 * Returns the next available transmission that was received
+	 * Returns the next available item
 	 * @return transmission
 	 */
-	public synchronized T getFromInQueue() {
-		if (this.getInQueueSize() == 0) {
+	public synchronized T dequeueIn() {
+		if (this.getInSize() == 0) {
 			System.err.println("THIS IN QUEUE IS NULL");
 			return null;
 		} else {
@@ -86,68 +43,93 @@ public class MailBox<T> {
 	}
 	
 	/**
-	 * Gets the next element that needs to be transmitted Return null if the
-	 * queue is empty
-	 * 
-	 * @return transmission
+	 * Returns the size of the incoming queue
+	 * @return integer
 	 */
-	public synchronized T peekOutQueue() {
-		if (this.getOutQueueSize() == 0) {
-			return null;
-		} else {
-			return out_queue.getFirst();
-		}
+	public synchronized int getInSize() {
+		return in_queue.size();
 	}
-
+	
 	/**
 	 * Returns the next available transmission that was received
 	 * @return transmission
 	 */
-	public synchronized T peekInQueue() {
-		if (this.getInQueueSize() == 0) {
+	public synchronized T peekIn() {
+		if (this.getInSize() == 0) {
 			return null;
 		} else {
 			return in_queue.getFirst();
 		}
 	}
+	
+	/**
+	 * Empties the incoming queue
+	 */
+	public synchronized void clearIn() {
+		in_queue.clear();
+	}
 
 	/**
-	 * Returns the size of the incoming queue
-	 * @return integer
+	 * Adds a new Item to the outgoing queue This Item will be
+	 * sent as soon as it becomes the next element
+	 * 
+	 * @param trans
 	 */
-	public synchronized int getInQueueSize() {
-		return in_queue.size();
+	public synchronized void enqueueOut(T t) {
+		out_queue.add(t);
+	}
+	
+	/**
+	 * Adds a new Item to the head of the outgoing queue This
+	 * Item is the next in line to be sent
+	 * 
+	 * @param trans
+	 */
+	public synchronized void enqueueOutPriority(T t) {
+		out_queue.add(0, t);
+	}
+	
+	/**
+	 * Gets the next element that needs to be transmitted Return null if the
+	 * queue is empty
+	 * 
+	 * @return transmission
+	 */
+	public synchronized T dequeueOut() {
+		if (this.getOutSize() == 0) {
+			System.err.println("THIS OUT QUEUE IS NULL");
+			return null;
+		} else {
+			return out_queue.removeFirst();
+		}
 	}
 
 	/**
 	 * Returns the size of the outgoing queue
 	 * @return integer
 	 */
-	public synchronized int getOutQueueSize() {
+	public synchronized int getOutSize() {
 		return out_queue.size();
 	}
 	
 	/**
-	 * Returns everything from the in queue of the Mailbox
-	 * @return
+	 * Gets the next element that needs to be transmitted Return null if the
+	 * queue is empty
+	 * 
+	 * @return transmission
 	 */
-	public synchronized LinkedList<T> getAllFromInQueue(){
-		return in_queue;
-	}
-	
+	public synchronized T peekOut() {
+		if (this.getOutSize() == 0) {
+			return null;
+		} else {
+			return out_queue.getFirst();
+		}
+	}	
+
 	/**
-	 * Returns everything from the out queue of the Mailbox
-	 * @return
+	 * Empties the outgoing queue
 	 */
-	public synchronized LinkedList<T> getAllFromOutQueue(){
-		return out_queue;
-	}
-
-	public synchronized void clearInQueue() {
-		in_queue.clear();
-	}
-
-	public synchronized void clearOutQueue() {
+	public synchronized void clearOut() {
 		out_queue.clear();
 	}
 }
