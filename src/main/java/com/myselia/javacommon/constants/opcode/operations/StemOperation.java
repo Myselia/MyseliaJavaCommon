@@ -6,6 +6,6 @@ public enum StemOperation implements Operation {
 	
 	SEEK,
 	SETUP,
-	CONFIRM_SETUP,
-	REJECT_SETUP
+	CONFIRMSETUP,
+	REJECTSETUP
 }

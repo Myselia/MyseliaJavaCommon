@@ -7,7 +7,7 @@ import com.myselia.javacommon.constants.opcode.Operation;
  */
 public enum DatabaseOperation implements Operation {
 	
-	REQUEST_SQL_DUMP,
-	FETCH_OBJECT_BY_ID
+	REQUESTSQLDUMP,
+	FETCHOBJECTBYID
 	
 }
