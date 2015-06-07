@@ -46,17 +46,7 @@ public class Message implements Serializable{
 		element_types.add(serializable.getClass().toString());
 		elements.add(serializable);
 	}
-
-	/**
-	 * adds multiple elements to the list of elements in this message
-	 * @param serializable
-	 */
-	public void addElementList(List<Serializable> serializable) {
-		for(Serializable serial : serializable){
-			this.addElement(serial);
-		}
-	}
-
+	
 	/**
 	 * returns all the elements of this message
 	 * @return

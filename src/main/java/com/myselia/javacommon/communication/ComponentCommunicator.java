@@ -21,7 +21,7 @@ import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.communication.units.TransmissionBuilder;
 import com.myselia.javacommon.constants.opcode.ActionType;
 import com.myselia.javacommon.constants.opcode.ComponentType;
-import com.myselia.javacommon.constants.opcode.OpcodeAccessor;
+import com.myselia.javacommon.constants.opcode.OpcodeBroker;
 import com.myselia.javacommon.constants.opcode.Operation;
 import com.myselia.javacommon.constants.opcode.operations.StemOperation;
 	
@@ -31,7 +31,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	private static MailBox<Transmission> systemMailbox;
 	
 	private static ComponentType componentType;
-	private static Operation componentOp;
 	private BroadcastListener bl;
 	private Gson jsonInterpreter;
 	
@@ -50,7 +49,6 @@ public class ComponentCommunicator implements Runnable, Addressable{
 
 	public ComponentCommunicator(ComponentType componentType) {
 		ComponentCommunicator.componentType = componentType;
-		componentOp = OpcodeAccessor.getOpcodes(componentType);
 		bl = new BroadcastListener(componentType);
 		jsonInterpreter = new Gson();
 	}
@@ -189,8 +187,8 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		System.out.print("Setting up setup packet ... ");
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
-			String from = OpcodeAccessor.make(componentType, ActionType.SETUP, componentOp.SEND_SETUP);
-			String to = OpcodeAccessor.make(ComponentType.STEM, ActionType.SETUP, StemOperation.SETUP);
+			String from = OpcodeBroker.make(componentType, null, ActionType.SETUP, null);
+			String to = OpcodeBroker.make(ComponentType.STEM, null, ActionType.SETUP, StemOperation.SETUP);
 			tb.newTransmission(from, to);
 			String[] ifaceInfo = getInterfaceInformation();
 			

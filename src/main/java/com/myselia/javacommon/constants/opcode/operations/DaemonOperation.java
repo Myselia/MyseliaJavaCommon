@@ -3,8 +3,11 @@ package com.myselia.javacommon.constants.opcode.operations;
 import com.myselia.javacommon.constants.opcode.Operation;
 
 /**
- * Opcodes used by the Daemon
+ * Opcodes used by the Daemon operations
  */
-public class DaemonOperation extends Operation {
-
+public enum DaemonOperation implements Operation {
+	
+	FETCH,
+	STARTSANDBOX
+	
 }

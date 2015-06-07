@@ -1,6 +1,6 @@
 package com.myselia.javacommon.constants.opcode;
 
-import com.myselia.javacommon.constants.opcode.Opcode;
+import com.myselia.javacommon.constants.opcode.OpcodeSegment;
 
 /**
  * Enum type that distinguishes between Mycelia components. 
@@ -8,7 +8,7 @@ import com.myselia.javacommon.constants.opcode.Opcode;
  * would identify the component as a LENS, allowing STEM networking code
  * to distinguish between various components. 
  */
-public enum ComponentType implements Opcode {
+public enum ComponentType implements OpcodeSegment {
 	/**
 	 * Sandbox running in master mode
 	 */

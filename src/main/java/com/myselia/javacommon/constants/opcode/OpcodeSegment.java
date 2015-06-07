@@ -1,4 +1,5 @@
 package com.myselia.javacommon.constants.opcode;
 
-public interface Opcode {
+public interface OpcodeSegment {
+	
 }

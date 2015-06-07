@@ -1,6 +1,6 @@
 package com.myselia.javacommon.exceptions;
 
-public class MyceliaOpcodeException extends Exception{
+public class MyseliaOpcodeException extends Exception{
 
 	/**
 	 * 

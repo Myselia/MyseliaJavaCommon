@@ -1,7 +1,7 @@
 package com.myselia.javacommon.constants.opcode;
 
 
-public enum ActionType implements Opcode{
+public enum ActionType implements OpcodeSegment{
 	
 	/**
 	 * Setup operations of component
@@ -21,6 +21,11 @@ public enum ActionType implements Opcode{
 	/**
 	 * Data transfer operations of component
 	 */
-	DATA
+	DATA, 
+	
+	/**
+	 * Configuration operations of component
+	 */
+	CONFIG
 
 }

@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.gson.Gson;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
-import com.myselia.javacommon.constants.opcode.OpcodeAccessor;
-import com.myselia.javacommon.exceptions.MyceliaOpcodeException;
+import com.myselia.javacommon.constants.opcode.OpcodeBroker;
+import com.myselia.javacommon.exceptions.MyseliaOpcodeException;
 
 public class MailService implements Runnable{
+	private static Gson json = new Gson();
     private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
     private static CopyOnWriteArrayList<Addressable> systemList;
     private static ComponentType componentType;
@@ -112,25 +114,27 @@ public class MailService implements Runnable{
 	}
 	
 	private static void redirect(Transmission trans) {
-		String fromOpcode = trans.get_header().get_from();
-		String localOpcode;
-		try {
-			if (MailService.getComponentType() == ComponentType.STEM)
-				localOpcode = OpcodeAccessor.getComponentOpcode(fromOpcode);
-			else 
-				localOpcode = OpcodeAccessor.getLocalOpcode(fromOpcode);
-			if (map.containsKey(localOpcode)) {
-				// This is a packet that needs to be forwarded
-				Iterator<Addressable> subsystemsToForwardTo = map.get(localOpcode).iterator();
-				while (subsystemsToForwardTo.hasNext()) {
-					Addressable subSystem = subsystemsToForwardTo.next();
-					subSystem.in(trans);
-					System.out.println("Mail Service: Redirected!");
-				}
-			}
-		} catch (MyceliaOpcodeException e) {
-			e.printStackTrace();
+		String opcode = trans.get_header().get_to();
+		String checking;
+		
+		if(MailService.getComponentType() == ComponentType.STEM){
+			checking = OpcodeBroker.getComponentActionOpcode(opcode);
+		} else {
+			checking = OpcodeBroker.getActionOperationOpcode(opcode);
 		}
+		
+		if (map.containsKey(checking)) {
+			// This is a packet that needs to be forwarded
+			Iterator<Addressable> subsystemsToForwardTo = map.get(checking).iterator();
+			while (subsystemsToForwardTo.hasNext()) {
+				Addressable subSystem = subsystemsToForwardTo.next();
+				subSystem.in(trans);
+				System.out.println("Mail Service: Redirected!");
+			}
+		} else {
+			System.err.println("Dropped transmission : " + json.toJson(trans.get_header()));
+		}
+	
 	}
 
 	@Override
