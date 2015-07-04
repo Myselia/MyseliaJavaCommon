@@ -75,6 +75,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 					//Receive Packets
 					if (input.ready()) {
 						if ((inputToken = input.readLine()) != null) {
+							System.out.println("GOT STUFF FROM UPHILL");
 							networkMailbox.enqueueIn(jsonInterpreter.fromJson(inputToken, Transmission.class));
 						}
 					}
@@ -106,6 +107,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	public void handleMailBoxPair(){
 		//re-routing network in to system out
 		if(networkMailbox.getInSize() > 0){
+			System.out.println("NEW STUFF IN NETWORK MAILBOX");
 			systemMailbox.enqueueOut(networkMailbox.dequeueIn());
 			MailService.notify(this);
 		}
