@@ -109,7 +109,7 @@ public class MailService implements Runnable{
 	 * @param addressable
 	 */
 	public static void notify(Addressable addressable){
-		//System.out.println("Mail Service: Notified!");
+		System.out.println("Mail Service: Notified!");
 		redirect(addressable.out());
 	}
 	

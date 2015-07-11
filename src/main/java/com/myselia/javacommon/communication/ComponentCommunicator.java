@@ -108,7 +108,9 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		//re-routing network in to system out
 		if(networkMailbox.getInSize() > 0){
 			System.out.println("NEW STUFF IN NETWORK MAILBOX");
-			systemMailbox.enqueueOut(networkMailbox.dequeueIn());
+			Transmission trans = networkMailbox.dequeueIn();
+			System.out.println(jsonInterpreter.toJson(trans));
+			systemMailbox.enqueueOut(trans);
 			MailService.notify(this);
 		}
 		
