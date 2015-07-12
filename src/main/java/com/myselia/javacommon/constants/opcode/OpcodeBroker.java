@@ -18,7 +18,7 @@ public final class OpcodeBroker {
 	 * Makes an opcode out of values
 	 * 
 	 * @param Component Type
-	 * @param MyseliaUUID
+	 * @param ComponentCertificate
 	 * @param ActionType
 	 * @param Operation
 	 * @return
@@ -44,7 +44,7 @@ public final class OpcodeBroker {
 			segregatedsegments[2] = getActionType(section[1]);
 			segregatedsegments[3] = getOperation((ComponentType)segregatedsegments[0], section[2]);
 		} catch (Exception e) {
-			System.err.println("Myselia Opcode Exception");
+			System.err.println("Opcode Broker : Myselia Opcode Exception");
 		}
 
 		return segregatedsegments;

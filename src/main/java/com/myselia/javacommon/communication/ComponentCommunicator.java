@@ -4,13 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import com.google.gson.Gson;
 import com.myselia.javacommon.communication.mail.Addressable;
@@ -22,8 +17,8 @@ import com.myselia.javacommon.communication.units.TransmissionBuilder;
 import com.myselia.javacommon.constants.opcode.ActionType;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeBroker;
-import com.myselia.javacommon.constants.opcode.Operation;
 import com.myselia.javacommon.constants.opcode.operations.StemOperation;
+import com.myselia.javacommon.topology.ComponentCertificate;
 	
 public class ComponentCommunicator implements Runnable, Addressable{
 	
@@ -42,6 +37,8 @@ public class ComponentCommunicator implements Runnable, Addressable{
 	private String inputToken = "";
 	private String outputToken = "";
 	
+	public ComponentCertificate componentCertificate;
+	
 	static {
 		networkMailbox = new MailBox<Transmission>();
 		systemMailbox = new MailBox<Transmission>();
@@ -51,6 +48,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		ComponentCommunicator.componentType = componentType;
 		bl = new BroadcastListener(componentType);
 		jsonInterpreter = new Gson();
+		componentCertificate = new ComponentCertificate(componentType);
 	}
 	
 	/**
@@ -184,22 +182,16 @@ public class ComponentCommunicator implements Runnable, Addressable{
 		}
 	}
 	
-	/**
-	 * sends a setup packet containing 
-	 */
+	//TODO: UUID FROM STEM
 	private void sendSetupPacket(){
 		System.out.print("Setting up setup packet ... ");
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
-			String from = OpcodeBroker.make(componentType, null, ActionType.SETUP, null);
+			String from = OpcodeBroker.make(componentCertificate.getComponentType(), componentCertificate.getUUID(), ActionType.SETUP, null);
 			String to = OpcodeBroker.make(ComponentType.STEM, null, ActionType.SETUP, StemOperation.SETUP);
 			tb.newTransmission(from, to);
-			String[] ifaceInfo = getInterfaceInformation();
-			
-			tb.addAtom("ip", "String", ifaceInfo[1]);
-			tb.addAtom("type", "String", componentType.toString());
-			tb.addAtom("mac", "String", ifaceInfo[0]);
-			tb.addAtom("hashID", "String",  Integer.toString((ifaceInfo[1] + ifaceInfo[0]).hashCode()));
+
+			tb.addAtom("componentCerficate", "ComponentCertificate", jsonInterpreter.toJson(componentCertificate));
 		
 			Transmission trans = tb.getTransmission();
 			output.println(jsonInterpreter.toJson(trans));
@@ -207,14 +199,12 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			System.out.println(" ... done");
 		} catch (Exception e) {
 			System.err.println("setup packet error");
-			//e.printStackTrace();
 		}
 	}
 	
 	/**
 	 * Test packet building method
 	 */
-	/*
 	private void sendTestPacket(){
 		try {
 			TransmissionBuilder tb = new TransmissionBuilder();
@@ -228,52 +218,7 @@ public class ComponentCommunicator implements Runnable, Addressable{
 			e.printStackTrace();
 		}
 	}
-	*/
-	/**
-	 * Method that returns the MAC address of the InetAddress in question
-	 * @param ia
-	 * @return String (MAC)
-	 * @throws SocketException
-	 */
-	/*
-	private String getMac(InetAddress ia) throws SocketException {
-		NetworkInterface network = NetworkInterface.getByInetAddress(ia);
-		byte[] mac = network.getHardwareAddress();
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < mac.length; i++) {
-			sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
-		}
-		return sb.toString();
-	}
-	*/
 
-	/**
-	 * 0	:	MAC
-	 * 1	:	IP
-	 */
-	private String[] getInterfaceInformation() {
-		String[] info = new String[2];
-	    try {
-	        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-	        while (interfaces.hasMoreElements()) {
-	            NetworkInterface iface = interfaces.nextElement();
-	            // filters out 127.0.0.1 and inactive interfaces
-	            if (iface.isLoopback() || !iface.isUp())
-	                continue;
-
-	            info[0] = new String(iface.getHardwareAddress());
-	            Enumeration<InetAddress> addresses = iface.getInetAddresses();
-	            while(addresses.hasMoreElements()) {
-	                InetAddress addr = addresses.nextElement();
-	                info[1] = addr.getHostAddress();
-	            }
-	        }
-	    } catch (SocketException e) {
-	        throw new RuntimeException(e);
-	    }
-	    
-	    return info;
-	}
 
 	@Override
 	public void in(Transmission trans) {
