@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeBroker;
-import com.myselia.javacommon.exceptions.MyseliaOpcodeException;
 
 public class MailService implements Runnable{
 	private static Gson json = new Gson();
