@@ -1,6 +1,7 @@
 package com.myselia.javacommon.framework.communication;
 
-import java.io.PrintWriter;
+import io.netty.channel.Channel;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,8 +13,12 @@ public class WebSocketHelper {
 	public static String keyStringSearch = "Sec-WebSocket-Key: ";
 	private static String webSocketUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
+	
+	public static int getPayloadSize(byte payloadByte) {
+		return (int)payloadByte;
+	}
 	/**
-	 * This funciton is used to wrap a string passed into it with a websocket compatible frame
+	 * This function is used to wrap a string passed into it with a websocket compatible frame
 	 * This frame is RFC 6455 compatible and available at: http://tools.ietf.org/html/rfc6455#page-20.
 	 * @param s	The string to be wrapped with the frame
 	 * @return	An array of bytes to be sent over a connection
@@ -113,6 +118,7 @@ public class WebSocketHelper {
 		return message;
 	}
 
+	@SuppressWarnings("unused")
 	private static void printBytes(byte[] b) {
 		for (int i = 0; i < b.length; i++) {
 			String s = String.format("%8s", Integer.toBinaryString(b[i] & 0xFF)).replace(' ', '0');
@@ -120,13 +126,13 @@ public class WebSocketHelper {
 		}
 	}
 	
-	public static void sendHandshakeResponse(PrintWriter o, String clientKey) {
-		o.println("HTTP/1.1 101 Switching Protocols");
-		o.println("Upgrade: WebSocket");
-		o.println("Connection: Upgrade");
-		o.println("Sec-WebSocket-Accept: " + generateOK(clientKey));
-		o.println("");
-		o.flush();
+	public static void sendHandshakeResponse(Channel ch, String clientKey) {
+		ch.write("HTTP/1.1 101 Switching Protocols\r\n");
+		ch.write("Upgrade: WebSocket\r\n");
+		ch.write("Connection: Upgrade\r\n");
+		ch.write("Sec-WebSocket-Accept: " + generateOK(clientKey));
+		ch.write("\r\n\r\n");
+		ch.flush();
 	}
 	
 	public static boolean isEndStreamSignal(byte[] bytePayload) {
