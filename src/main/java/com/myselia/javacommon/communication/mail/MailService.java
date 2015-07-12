@@ -109,7 +109,7 @@ public class MailService implements Runnable{
 	 * @param addressable
 	 */
 	public static void notify(Addressable addressable){
-		System.out.println("Mail Service: Notified!");
+		System.out.println("Mail Service - Notified");
 		redirect(addressable.out());
 	}
 	
@@ -127,9 +127,10 @@ public class MailService implements Runnable{
 			// This is a packet that needs to be forwarded
 			Iterator<Addressable> subsystemsToForwardTo = map.get(checking).iterator();
 			while (subsystemsToForwardTo.hasNext()) {
+				System.out.println("ONCE!");
 				Addressable subSystem = subsystemsToForwardTo.next();
 				subSystem.in(trans);
-				System.out.println("Mail Service: Redirected!");
+				System.out.println("Mail Service has redirected to : " + subSystem.getClass());
 			}
 		} else {
 			System.err.println("Dropped transmission : " + json.toJson(trans.get_header()));
