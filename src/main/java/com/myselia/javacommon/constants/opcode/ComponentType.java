@@ -1,6 +1,5 @@
 package com.myselia.javacommon.constants.opcode;
 
-import com.myselia.javacommon.constants.opcode.OpcodeSegment;
 
 /**
  * Enum type that distinguishes between Mycelia components. 

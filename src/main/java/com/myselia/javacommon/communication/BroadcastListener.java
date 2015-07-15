@@ -12,38 +12,35 @@ import com.myselia.javacommon.constants.opcode.ComponentType;
 
 public class BroadcastListener {
 
+	private static Gson jsonInterpreter = new Gson();
 	private static int externalListenPort = 42068;
 	private static int internalListenPort = 42065;
-	private ComponentType componenttype;
-	
+	private ComponentCommunicator componentCommunicator;
 	private DatagramSocket socket;
 	
 	private boolean CORRECT = false;
 	private boolean SEEKING = true;
 	
-	public BroadcastListener(ComponentType componenttype) {
-		this.componenttype = componenttype;
+	public BroadcastListener(ComponentCommunicator componentCommunicator) {
+		this.componentCommunicator = componentCommunicator;
 	}
-	
 	
 	/**
 	 * Listens to all transmissions and checks if they're addressed to its kind
 	 * @param length
 	 * @return
 	 */
-	public Transmission listen(int length){
-		Gson g = new Gson();
-		
-		if(componenttype == ComponentType.SANDBOXSLAVE){
+	public void listen(int length) {
+		if(componentCommunicator.getComponentCertificate().getComponentType() == ComponentType.SANDBOXSLAVE){
 			setupSocket(false);
 		} else {
 			setupSocket(true);
 		}
 	    
-	    Transmission trans = new Transmission();
 	    byte[] buffer;
 	    DatagramPacket packet;
 	    String make = "";
+	    Transmission broadcastTransmission = null;
 		
 		while (!CORRECT) {
 			try {
@@ -55,6 +52,8 @@ public class BroadcastListener {
 					make = new String(buffer);
 					System.out.println("RECV Broadcast: " + make);
 					make = make.substring(0, make.lastIndexOf('}') + 1);
+					
+					broadcastTransmission = jsonInterpreter.fromJson(make, Transmission.class);
 					break;
 				}
 			} catch (IOException e) {
@@ -62,19 +61,15 @@ public class BroadcastListener {
 				e.printStackTrace();
 			}
 			
-			try {
-				trans = g.fromJson(make, Transmission.class);
-				System.out.println("[OK]" + make + "[OK]");
-			} catch (Exception e) {
-				System.err.println("[ERROR]" + make + "[ERROR]");
-				e.printStackTrace();
-			}
-	    	ArrayList<Atom> list = trans.get_atoms();
+			System.out.println("CHECKING!!!!!!!!!!!!");
+
+			//Checks to see if the type of component the broadcast transmission is targeting is relevant to this component
+	    	ArrayList<Atom> list = broadcastTransmission.get_atoms();
 	    	if(list.size() == 3){
 				Atom a = list.get(2);
 				if (a.get_type().equals("String") && a.get_field().equals("type")) {
 					String check = a.get_value();
-					if (check.equals(componenttype.toString())) {
+					if (check.equals(componentCommunicator.getComponentCertificate().getComponentType().name())) {
 						CORRECT = true;
 						packet = null;
 						socket.close();
@@ -82,15 +77,17 @@ public class BroadcastListener {
 					}
 	    		}
 	    	}
-	    	
 	    }
-	    
-	    return trans;
 		
+		if (CORRECT) {
+			endSeeking();
+			componentCommunicator.connect(broadcastTransmission);
+		}
 	}
 	
 	public void startSeeking() {
 		SEEKING = true;
+		listen(1024);
 		System.out.println("Starting bcast session");
 	}
 	
@@ -98,10 +95,6 @@ public class BroadcastListener {
 		SEEKING = false;
 		CORRECT = false;
 		System.out.println("End of bcast session");
-	}
-	
-	public boolean transmissionReady() {
-		return CORRECT;
 	}
 	
 	private void setupSocket(boolean external) {
