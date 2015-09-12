@@ -53,7 +53,7 @@ public class ComponentCommunicator implements Addressable{
 			b.handler(new ComponentCommunicatorInitializer(this));
 
 			// Start the client.
-			ChannelFuture f = b.connect(componentCertificate.getHostName(), port).sync(); 
+			ChannelFuture f = b.connect(stemCertificate.getHostName(), port).sync(); 
 
 			f.channel().closeFuture().sync();
 		} finally {
