@@ -35,7 +35,7 @@ public class MailBox<T> {
 	 */
 	public synchronized T dequeueIn() {
 		if (this.getInSize() == 0) {
-			System.err.println("THIS IN QUEUE IS NULL");
+			System.err.println("MailBox : the inqueue is null");
 			return null;
 		} else {
 			return in_queue.removeFirst();
@@ -97,7 +97,7 @@ public class MailBox<T> {
 	 */
 	public synchronized T dequeueOut() {
 		if (this.getOutSize() == 0) {
-			System.err.println("THIS OUT QUEUE IS NULL");
+			System.err.println("MailBox : the outqueue is null");
 			return null;
 		} else {
 			return out_queue.removeFirst();
