@@ -96,12 +96,14 @@ public class ComponentCommunicator implements Addressable, Runnable {
 	}
 
 	@Override
+	//Something is meant to be sent out
 	public void in(Transmission trans) {
 		mailBox.enqueueIn(trans);
 		endpointReceive();
 	}
 	
 	@Override
+	//Something has been received, this takes it out
 	public Transmission out(){
 		return mailBox.dequeueOut();
 	}
@@ -116,13 +118,18 @@ public class ComponentCommunicator implements Addressable, Runnable {
 
 	@Override
 	public void run() {
-		networkThread = new Thread(this);
+		System.out.println("STARTING SEEK PROCEDURE");
 		bl.startSeeking();
 		try {
 			Thread.currentThread().join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void start() {
+		networkThread = new Thread(this);
+		networkThread.start();
 	}
 
 }
