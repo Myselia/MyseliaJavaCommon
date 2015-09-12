@@ -51,6 +51,7 @@ public class BroadcastListener {
 					socket.receive(packet);
 					make = new String(buffer);
 					System.out.println("RECV Broadcast: " + make);
+					//TODO: This part is reaaaaaaaaaaaaaaaaaaaaally iffy
 					make = make.substring(0, make.lastIndexOf('}') + 1);
 					
 					broadcastTransmission = jsonInterpreter.fromJson(make, Transmission.class);
