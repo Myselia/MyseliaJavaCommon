@@ -14,7 +14,7 @@ import com.myselia.javacommon.communication.codecs.TransmissionToStringEncoder;
 
 public class ComponentCommunicatorInitializer extends ChannelInitializer<SocketChannel> {
 
-	private static final int MAX_FRAME_SIZE = 8096;
+	private static final int MAX_FRAME_SIZE = 65536;
 	private final StringDecoder stringDecoder = new StringDecoder(CharsetUtil.UTF_8);
 	private final StringEncoder stringEncoder = new StringEncoder(CharsetUtil.UTF_8);
 	private ComponentCommunicator componentCommunicator;

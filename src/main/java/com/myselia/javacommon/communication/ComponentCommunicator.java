@@ -17,8 +17,9 @@ import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.topology.ComponentCertificate;
 	
-public class ComponentCommunicator implements Addressable{
+public class ComponentCommunicator implements Addressable, Runnable {
 	
+	private Thread networkThread;
 	private static Gson jsonInterpreter = new Gson();
 	private MailBox<Transmission> mailBox;
 	private BroadcastListener bl;
@@ -38,10 +39,6 @@ public class ComponentCommunicator implements Addressable{
 		handler.write(mailBox.dequeueIn());
 	}
 	
-	public void start() {
-		bl.startSeeking();
-	}
-
 	private void createNetworkClient(ComponentCertificate stemCertificate, int port) throws InterruptedException {
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -115,6 +112,17 @@ public class ComponentCommunicator implements Addressable{
 	
 	public void setHandler(ComponentCommunicationHandler handler) {
 		this.handler = handler;
+	}
+
+	@Override
+	public void run() {
+		networkThread = new Thread(this);
+		bl.startSeeking();
+		try {
+			Thread.currentThread().join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
