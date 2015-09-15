@@ -36,7 +36,12 @@ public class ComponentCommunicator implements Addressable, Runnable {
 	}
 	
 	public void endpointReceive() {
-		handler.write(mailBox.dequeueIn());
+		System.out.println("Handler is at: " + handler);
+		System.out.println("Mailbox is at: " + mailBox.peekIn());
+		if(handler != null){
+			handler.write(mailBox.dequeueIn());
+		}
+		
 	}
 	
 	private void createNetworkClient(ComponentCertificate stemCertificate, int port) throws InterruptedException {
