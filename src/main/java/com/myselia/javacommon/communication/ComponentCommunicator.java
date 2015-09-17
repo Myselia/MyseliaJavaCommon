@@ -24,7 +24,7 @@ public class ComponentCommunicator implements Addressable, Runnable {
 	private MailBox<Transmission> mailBox;
 	private BroadcastListener bl;
 	private ComponentCommunicationHandler handler = null;
-	private ComponentCertificate componentCertificate = null;
+	public static ComponentCertificate componentCertificate = null;
 	private ComponentCertificate stemCertificate = null;
 	
 	private boolean CONNECTED = false;
