@@ -21,10 +21,10 @@ public class ComponentCommunicator implements Addressable, Runnable {
 	
 	private Thread networkThread;
 	private static Gson jsonInterpreter = new Gson();
+	public static ComponentCertificate componentCertificate = null;
 	private MailBox<Transmission> mailBox;
 	private BroadcastListener bl;
 	private ComponentCommunicationHandler handler = null;
-	private ComponentCertificate componentCertificate = null;
 	private ComponentCertificate stemCertificate = null;
 	
 	private boolean CONNECTED = false;

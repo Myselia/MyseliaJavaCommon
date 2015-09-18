@@ -11,8 +11,8 @@ import com.myselia.javacommon.topology.MyseliaUUID;
 
 public final class OpcodeBroker {
 
-	private static final String SEPARATOR = "_";
-	private static final String SEGMENTOR = ":";
+	public static final String SEPARATOR = "_";
+	public static final String SEGMENTOR = ":";
 
 	/**
 	 * Makes an opcode out of values
@@ -150,5 +150,35 @@ public final class OpcodeBroker {
 		OpcodeSegment[] segregatedsegments =OpcodeBroker.segregate(opcode);
 		return makeMailCheckingOpcode(segregatedsegments[2], segregatedsegments[3]);
 	}
+
+	/*
+	 * 
+	 * Helper methods because I don't want to break stuff
+	 * 
+	 * fromHeader format
+	 * 		COMPONENTTYPE:MUUID_ACTION_OPERATION
+	 * 
+	 */
+	public static ComponentType deduceComponent(String fromHeader) {
+		String s = getComponentActionOpcode(fromHeader);
+		String componentStr = s.split(SEPARATOR)[0];
+		
+		return ComponentType.valueOf(componentStr);
+	}
+
+	public static Operation deduceOperation(String fromHeader) {
+		ComponentType t = deduceComponent(fromHeader);
+		String operation  = getActionOperationOpcode(fromHeader).split(SEPARATOR)[1];
+		
+		Operation o = null;
+		try {
+			o = getOperation(t, operation);
+		} catch (MyseliaOpcodeException e) {
+			e.printStackTrace();
+		}
+		
+		return o;
+	}
+
 
 }

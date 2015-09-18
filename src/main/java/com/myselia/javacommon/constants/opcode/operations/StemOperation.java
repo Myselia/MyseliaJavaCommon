@@ -9,5 +9,6 @@ public enum StemOperation implements Operation {
 	SETUP,
 	CONFIRMSETUP,
 	REJECTSETUP,
-	TEST
+	TEST,
+	TABLEBROADCAST
 }

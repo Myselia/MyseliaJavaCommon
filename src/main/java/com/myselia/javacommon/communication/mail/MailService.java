@@ -8,26 +8,37 @@ import com.google.gson.Gson;
 import com.myselia.javacommon.communication.units.Transmission;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeBroker;
+import com.myselia.javacommon.topology.MyseliaRoutingTable;
+import com.myselia.javacommon.topology.MyseliaUUID;
 
 public class MailService implements Runnable{
+	
+	public static MyseliaRoutingTable routingTable;
+	
 	private static Gson json = new Gson();
     private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
     private static CopyOnWriteArrayList<Addressable> systemList;
     private static ComponentType componentType;
    
-    
     static {
         map = new HashMap<String, CopyOnWriteArrayList<Addressable>>();
         systemList = new CopyOnWriteArrayList<Addressable>();
     }
      
     /**
-     * Mail service constructor that sets a distributor type
-     * @param distributorType
-     */
-    public MailService(ComponentType componentType) {
-    	MailService.componentType = componentType; 
-    }
+	 * Mail service constructor that sets a distributor type
+	 * 
+	 * @param distributorType
+	 */
+	public MailService(ComponentType componentType, MyseliaUUID MUUID) {
+		MailService.componentType = componentType;
+		routingTable = new MyseliaRoutingTable(MUUID);
+	}
+	
+	//For local runtime (Sandbox) backwards compatibility
+	public MailService(ComponentType componentType) {
+		MailService.componentType = componentType;
+	}
     
     /**
      * Call to register to packet updates containing a particular field.

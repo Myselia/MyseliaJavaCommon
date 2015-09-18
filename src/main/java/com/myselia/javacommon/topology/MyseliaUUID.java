@@ -5,8 +5,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.myselia.javacommon.constants.opcode.ComponentType;
 import com.myselia.javacommon.constants.opcode.OpcodeSegment;
 
-public class MyseliaUUID implements OpcodeSegment{
-	private final String UUID;
+public class MyseliaUUID implements OpcodeSegment {
+	
+	private String UUID = null;
+
+	
+	public MyseliaUUID() {
+
+	}
 	
 	public MyseliaUUID(String UUID){
 		this.UUID = UUID;
