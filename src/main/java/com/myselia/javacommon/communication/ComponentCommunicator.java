@@ -43,12 +43,13 @@ public class ComponentCommunicator implements Addressable, Runnable {
 		mailBox = new MailBox<Transmission>();
 	}
 	
+	//CC has something to send out
 	public void endpointReceive() {
 		System.out.println("Handler is at: " + handler);
 		System.out.println("Mailbox is at: " + mailBox.peekIn());
-		if(handler != null){
-			handler.write(mailBox.dequeueIn());
-		}
+		//if(handler != null){
+		handler.write(mailBox.dequeueIn());
+		//}
 	}
 	
 	private void createNetworkClient(ComponentCertificate stemCertificate, int port) throws InterruptedException {
@@ -90,7 +91,6 @@ public class ComponentCommunicator implements Addressable, Runnable {
 			e.printStackTrace();
 		}
 	}
-	
 
 	//TODO DUPLICATE CODE, ORIGINALLY IN SLAVESESSION! -vynny
 	public static Transmission routingTableUpdateTransmission() {
@@ -98,7 +98,6 @@ public class ComponentCommunicator implements Addressable, Runnable {
 		String from = OpcodeBroker.make(componentCertificate.getComponentType(), componentCertificate.getUUID(), ActionType.CONFIG, DaemonOperation.TABLEBROADCAST);
 		String to = OpcodeBroker.make(ComponentType.STEM, stemCertificate.getUUID(), ActionType.CONFIG, StemOperation.TABLEBROADCAST);
 		tb.newTransmission(from, to);
-		System.out.println("MS IT AT : " + MailService.routingTable);
 		tb.addAtom("routingTable", "MyseliaRoutingTable", jsonInterpreter
 				.toJson(MailService.routingTable,
 						MailService.routingTable.getClass()));

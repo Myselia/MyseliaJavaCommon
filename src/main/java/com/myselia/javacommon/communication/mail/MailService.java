@@ -157,8 +157,11 @@ public class MailService implements Runnable {
 		}
 
 	}
-
-	@Override
+	
+	public void generateRoutingTable(MyseliaUUID uuid) {
+		routingTable = new MyseliaRoutingTable(uuid);
+	}
+	
 	public void run() {
 
 	}
