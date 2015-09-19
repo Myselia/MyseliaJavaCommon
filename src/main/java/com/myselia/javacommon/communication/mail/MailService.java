@@ -147,12 +147,13 @@ public class MailService implements Runnable {
 			// This is a packet that needs to be forwarded
 			Iterator<Addressable> subsystemsToForwardTo = map.get(checking).iterator();
 			while (subsystemsToForwardTo.hasNext()) {
+				
 				Addressable subSystem = subsystemsToForwardTo.next();
 				subSystem.in(trans);
-				System.out.println("Mail Service : redirected to : " + subSystem.getClass());
+				System.out.println("Mail Service has redirected ||" + checking + "|| to : " + subSystem.getClass());
 			}
 		} else {
-			System.err.println("Mail Service : dropped transmission : " + json.toJson(trans.get_header()));
+			System.err.println("Mail Service has dropped transmission : " + json.toJson(trans.get_header()));
 		}
 
 	}
