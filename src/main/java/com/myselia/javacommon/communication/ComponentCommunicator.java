@@ -12,20 +12,28 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import com.myselia.javacommon.communication.mail.Addressable;
 import com.myselia.javacommon.communication.mail.MailBox;
+import com.myselia.javacommon.communication.mail.MailService;
 import com.myselia.javacommon.communication.units.Atom;
 import com.myselia.javacommon.communication.units.Transmission;
+import com.myselia.javacommon.communication.units.TransmissionBuilder;
+import com.myselia.javacommon.constants.opcode.ActionType;
 import com.myselia.javacommon.constants.opcode.ComponentType;
+import com.myselia.javacommon.constants.opcode.OpcodeBroker;
+import com.myselia.javacommon.constants.opcode.operations.DaemonOperation;
+import com.myselia.javacommon.constants.opcode.operations.StemOperation;
 import com.myselia.javacommon.topology.ComponentCertificate;
 	
 public class ComponentCommunicator implements Addressable, Runnable {
 	
-	private Thread networkThread;
-	private static Gson jsonInterpreter = new Gson();
+	public static ComponentCertificate stemCertificate = null;
 	public static ComponentCertificate componentCertificate = null;
+	
+	private static Gson jsonInterpreter = new Gson();
+	
+	private Thread networkThread;
 	private MailBox<Transmission> mailBox;
 	private BroadcastListener bl;
-	private ComponentCommunicationHandler handler = null;
-	private ComponentCertificate stemCertificate = null;
+	private ComponentCommunicationHandler handler;
 	
 	private boolean CONNECTED = false;
 
@@ -41,7 +49,6 @@ public class ComponentCommunicator implements Addressable, Runnable {
 		if(handler != null){
 			handler.write(mailBox.dequeueIn());
 		}
-		
 	}
 	
 	private void createNetworkClient(ComponentCertificate stemCertificate, int port) throws InterruptedException {
@@ -82,6 +89,20 @@ public class ComponentCommunicator implements Addressable, Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+
+	//TODO DUPLICATE CODE, ORIGINALLY IN SLAVESESSION! -vynny
+	public static Transmission routingTableUpdateTransmission() {
+		TransmissionBuilder tb = new TransmissionBuilder();
+		String from = OpcodeBroker.make(componentCertificate.getComponentType(), componentCertificate.getUUID(), ActionType.CONFIG, DaemonOperation.TABLEBROADCAST);
+		String to = OpcodeBroker.make(ComponentType.STEM, stemCertificate.getUUID(), ActionType.CONFIG, StemOperation.TABLEBROADCAST);
+		tb.newTransmission(from, to);
+		System.out.println("MS IT AT : " + MailService.routingTable);
+		tb.addAtom("routingTable", "MyseliaRoutingTable", jsonInterpreter
+				.toJson(MailService.routingTable,
+						MailService.routingTable.getClass()));
+		return tb.getTransmission();
 	}
 	
 	public ComponentCertificate getComponentCertificate() {
@@ -125,11 +146,11 @@ public class ComponentCommunicator implements Addressable, Runnable {
 	public void run() {
 		System.out.println("STARTING SEEK PROCEDURE");
 		bl.startSeeking();
-		try {
+		/*try {
 			Thread.currentThread().join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public void start() {

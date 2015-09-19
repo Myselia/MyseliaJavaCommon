@@ -11,21 +11,21 @@ import com.myselia.javacommon.constants.opcode.OpcodeBroker;
 import com.myselia.javacommon.topology.MyseliaRoutingTable;
 import com.myselia.javacommon.topology.MyseliaUUID;
 
-public class MailService implements Runnable{
-	
+public class MailService implements Runnable {
+
 	public static MyseliaRoutingTable routingTable;
-	
+
 	private static Gson json = new Gson();
-    private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
-    private static CopyOnWriteArrayList<Addressable> systemList;
-    private static ComponentType componentType;
-   
-    static {
-        map = new HashMap<String, CopyOnWriteArrayList<Addressable>>();
-        systemList = new CopyOnWriteArrayList<Addressable>();
-    }
-     
-    /**
+	private static HashMap<String, CopyOnWriteArrayList<Addressable>> map;
+	private static CopyOnWriteArrayList<Addressable> systemList;
+	private static ComponentType componentType;
+
+	static {
+		map = new HashMap<String, CopyOnWriteArrayList<Addressable>>();
+		systemList = new CopyOnWriteArrayList<Addressable>();
+	}
+
+	/**
 	 * Mail service constructor that sets a distributor type
 	 * 
 	 * @param distributorType
@@ -34,48 +34,54 @@ public class MailService implements Runnable{
 		MailService.componentType = componentType;
 		routingTable = new MyseliaRoutingTable(MUUID);
 	}
-	
-	//For local runtime (Sandbox) backwards compatibility
+
+	// For local runtime (Sandbox) backwards compatibility
 	public MailService(ComponentType componentType) {
 		MailService.componentType = componentType;
 	}
-    
-    /**
-     * Call to register to packet updates containing a particular field.
-     * @param opcode	The field to listen for updates to
-     * @param subsystem	The subsystem registering (typically 'this')
-     */
-    public synchronized static void register(String opcode, Addressable subsystem) {
-    	registerAddressable(subsystem);
-    	CopyOnWriteArrayList<Addressable> a;
-    	//First time field is accessed 
-    	if (map.get(opcode) == null) {
-    		a = new CopyOnWriteArrayList<Addressable>();
-    		map.put(opcode, a);
-    	} else {
-    		a = map.get(opcode);
-    	}
-    	a.add(subsystem);
-    }
-    
-    /**
-     * Registers the subsystem to the system list
-     * @param subsystem
-     */
-    public synchronized static void registerAddressable(Addressable subsystem) {
-    	if(!isRegistered(subsystem)){
-    		systemList.add(subsystem);
-    		System.out.println("MailService : registered addressable : " + subsystem.getClass().toString());
-    	}
-    }
-    
-    /**
-     * Unregisters the component from the particular field
-     * @param field
-     * @param subsystem
-     */
-    public void unregister(String field, Addressable subsystem) {
-    	CopyOnWriteArrayList<Addressable> subscriberList;
+
+	/**
+	 * Call to register to packet updates containing a particular field. Opcode
+	 * is routed according to the 'to' attribute in the header
+	 * 
+	 * @param opcode
+	 *            The field to listen for updates to
+	 * @param subsystem
+	 *            The subsystem registering (typically 'this')
+	 */
+	public synchronized static void register(String opcode, Addressable subsystem) {
+		registerAddressable(subsystem);
+		CopyOnWriteArrayList<Addressable> a;
+		// First time field is accessed
+		if (map.get(opcode) == null) {
+			a = new CopyOnWriteArrayList<Addressable>();
+			map.put(opcode, a);
+		} else {
+			a = map.get(opcode);
+		}
+		a.add(subsystem);
+	}
+
+	/**
+	 * Registers the subsystem to the system list
+	 * 
+	 * @param subsystem
+	 */
+	public synchronized static void registerAddressable(Addressable subsystem) {
+		if (!isRegistered(subsystem)) {
+			systemList.add(subsystem);
+			System.out.println("MailService : registered addressable : " + subsystem.getClass().toString());
+		}
+	}
+
+	/**
+	 * Unregisters the component from the particular field
+	 * 
+	 * @param field
+	 * @param subsystem
+	 */
+	public void unregister(String field, Addressable subsystem) {
+		CopyOnWriteArrayList<Addressable> subscriberList;
 		if ((map.get(field) != null)) {
 			subscriberList = map.get(field);
 			if (subscriberList.contains(subsystem)) {
@@ -83,23 +89,25 @@ public class MailService implements Runnable{
 				subscriberList.remove(subListIndex);
 			}
 		}
-    }
-    
-    /**
-     * Returns true if the addressable unit is already registered
-     * @param alpha
-     * @return
-     */
-	public static boolean isRegistered(Addressable alpha){
-    	if (systemList.contains(alpha)){
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
+	}
+
+	/**
+	 * Returns true if the addressable unit is already registered
+	 * 
+	 * @param alpha
+	 * @return
+	 */
+	public static boolean isRegistered(Addressable alpha) {
+		if (systemList.contains(alpha)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * getter for the mappings of the fields to addressable units
+	 * 
 	 * @return
 	 */
 	public HashMap<String, CopyOnWriteArrayList<Addressable>> getMap() {
@@ -108,30 +116,33 @@ public class MailService implements Runnable{
 
 	/**
 	 * getter for the component type that instantiated this MailService
+	 * 
 	 * @return
 	 */
 	public static ComponentType getComponentType() {
 		return componentType;
 	}
-	
+
 	/**
-	 * Notifies the MailService that there is a transmission in a certain mailbox
+	 * Notifies the MailService that there is a transmission in a certain
+	 * mailbox
+	 * 
 	 * @param addressable
 	 */
-	public static void notify(Addressable addressable){
+	public static void notify(Addressable addressable) {
 		redirect(addressable.out());
 	}
-	
+
 	private static void redirect(Transmission trans) {
 		String opcode = trans.get_header().get_to();
 		String checking;
-		
-		if(MailService.getComponentType() == ComponentType.STEM){
+
+		if (MailService.getComponentType().equals(ComponentType.STEM)) {
 			checking = OpcodeBroker.getComponentActionOpcode(opcode);
 		} else {
 			checking = OpcodeBroker.getActionOperationOpcode(opcode);
 		}
-		
+
 		if (map.containsKey(checking)) {
 			// This is a packet that needs to be forwarded
 			Iterator<Addressable> subsystemsToForwardTo = map.get(checking).iterator();
@@ -143,12 +154,12 @@ public class MailService implements Runnable{
 		} else {
 			System.err.println("Mail Service : dropped transmission : " + json.toJson(trans.get_header()));
 		}
-	
+
 	}
 
 	@Override
 	public void run() {
-		
+
 	}
 
 }

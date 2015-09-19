@@ -38,14 +38,19 @@ public class ComponentCommunicationHandler extends SimpleChannelInboundHandler<T
 		this.stemCertificate = componentCommunicator.getStemCertificate();
 		this.mailBox = componentCommunicator.getMailBox();
 		componentCommunicator.setHandler(this);
-		setupFutures(clientChannel);
+		//setupFutures(clientChannel);
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) {
 		System.out.println("[ComponentCommunicator]: Established connection @ " + ctx);
 		System.out.println("\t|-->Awaiting handshake");
+
+		//Send the setup packet expected by the stem containing the component certificate
 		sendSetupPacket();
+		
+		//Send current routing table 
+		write(ComponentCommunicator.routingTableUpdateTransmission());
 	}
 
 	@Override
@@ -65,7 +70,7 @@ public class ComponentCommunicationHandler extends SimpleChannelInboundHandler<T
 		clientChannel.writeAndFlush(t);
 	}
 
-	public void setupFutures(Channel channel) {
+	/*public void setupFutures(Channel channel) {
 		ChannelFuture closeFuture = channel.closeFuture();
 
 		closeFuture.addListener(new ChannelFutureListener() {
@@ -74,7 +79,7 @@ public class ComponentCommunicationHandler extends SimpleChannelInboundHandler<T
 				System.out.println("DISCONNECTED ");
 			}
 		});
-	}
+	}*/
 
 	private void sendSetupPacket() {
 		System.out.print("Setting up setup packet ... ");

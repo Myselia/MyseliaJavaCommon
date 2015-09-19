@@ -2,19 +2,20 @@ package com.myselia.javacommon.topology;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MyseliaRoutingTable {
 	
 	private String localMUUID = null;
-	private HashMap<String, String> table;
+	private ConcurrentHashMap<String, String> table;
 	
 	public MyseliaRoutingTable() {
-		table = new HashMap<String, String>();
+		table = new ConcurrentHashMap<String, String>();
 	}
 	
 	public MyseliaRoutingTable(MyseliaUUID localMUUID){
 		this.localMUUID = localMUUID.toString();
-		table = new HashMap<String, String>();
+		table = new ConcurrentHashMap<String, String>();
 	}
 	
 	/**
@@ -50,7 +51,7 @@ public class MyseliaRoutingTable {
 	 * Removes a destination from the 
 	 * @param destination
 	 */
-	public void removeDestination(MyseliaUUID destination){
+	public void removeDestination(String destination){
 		table.remove(destination);
 	}
 	
@@ -69,16 +70,32 @@ public class MyseliaRoutingTable {
 		 * 	setNext(S, D)
 		 */
 		
-		//TODO Update Integrity
-		Iterator<String> it = src.getTable().keySet().iterator();
-		while (it.hasNext()) {
-			String dest = it.next();
-			setNext(dest, src.getLocalMUUID().toString());
+		// If the table is of size nil, then all links have been severed and the
+		// component that sent this routing table no longer serves as a relay for anything
+
+		if (src.getTable().isEmpty()) {
+			// Sever all hop links
+			Iterator<String> it = table.keySet().iterator();
+			while (it.hasNext()) {
+				String dest = it.next();
+				if (!dest.equals(table.get(dest))) {
+					//TODO It might be better to use it.remove() here. As a temporary fix of the 
+					//ConcurrentModificationException, the route table was changed to ConcurrentHashMap.
+					removeDestination(dest);
+				}
+			}
+		} else {
+			// Update all hop links
+			Iterator<String> it = src.getTable().keySet().iterator();
+			while (it.hasNext()) {
+				String dest = it.next();
+				setNext(dest, src.getLocalMUUID().toString());
+			}
 		}
 		
 	}
 	
-	public HashMap<String, String> getTable() {
+	public ConcurrentHashMap<String, String> getTable() {
 		return table;
 	}
 
@@ -96,8 +113,8 @@ public class MyseliaRoutingTable {
 		data += "My Local MUUID is: " + localMUUID + "\n";
 
 		for (String s : table.keySet()) {
-			data += "\tHave a key: " + s + "\n";
-			data += "\t\tWith value " + table.get(s) + "\n";
+			data += "\tHave a destination: " + s + "\n";
+			data += "\t\tNext hop is -> " + table.get(s) + "\n";
 		}
 
 		return data;
