@@ -7,7 +7,7 @@ import com.myselia.javacommon.constants.opcode.OpcodeSegment;
 
 public class MyseliaUUID implements OpcodeSegment {
 	
-	private String UUID = null;
+	private String UUID = "";
 
 	
 	public MyseliaUUID() {
